@@ -1,6 +1,6 @@
 # Measures idle memory (process tree incl. WebView2) and time-to-window for a built app.
 # Usage: pwsh scripts/perf/measure.ps1 -Exe path\to\app.exe [-IdleSeconds 8] [-Runs 3]
-param([Parameter(Mandatory)][string]$Exe, [int]$IdleSeconds = 8, [int]$Runs = 3)
+param([Parameter(Mandatory)][string]$Exe, [string[]]$ExeArgs = @(), [int]$IdleSeconds = 8, [int]$Runs = 3)
 
 function Get-Tree($rootId) {
   $all = Get-CimInstance Win32_Process
@@ -15,7 +15,7 @@ function Get-Tree($rootId) {
 $results = @()
 for ($i = 0; $i -lt $Runs; $i++) {
   $sw = [Diagnostics.Stopwatch]::StartNew()
-  $p = Start-Process -FilePath $Exe -PassThru
+  if ($ExeArgs.Count) { $p = Start-Process -FilePath $Exe -ArgumentList $ExeArgs -PassThru } else { $p = Start-Process -FilePath $Exe -PassThru }
   while (-not $p.HasExited -and $p.MainWindowHandle -eq 0 -and $sw.Elapsed.TotalSeconds -lt 30) { Start-Sleep -Milliseconds 20; $p.Refresh() }
   $startMs = $sw.ElapsedMilliseconds
   Start-Sleep -Seconds $IdleSeconds
