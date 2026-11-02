@@ -120,7 +120,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 - [x] T048 [P] [US2] Tests del reordenado y de cerrar otras/todas (lógica pura) en `tests/unit/tabs-store.spec.ts`
 - [x] T049 [P] [US2] Tests del pool LRU (montar, ocultar, expulsar, remontar con contenido actual) en `tests/unit/editor-pool.spec.ts`
-- [ ] T050 [P] [US2] Tests RTL de la barra de pestañas (nombre, indicador de cambios, cierre, activa, nueva) en `tests/components/tabbar.spec.tsx`
+- [x] T050 [P] [US2] Tests RTL de la barra de pestañas (nombre, indicador de cambios, cierre, activa, nueva) en `tests/components/tabbar.spec.tsx`
 - [ ] T051 [P] [US2] E2E de UI: abrir 3, alternar, reordenar, cerrar otras en `tests/e2e/ui/tabs.spec.ts`
 
 ### Implementación
@@ -201,7 +201,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 ### Tests
 
 - [x] T084 [P] [US5] Tests Rust de filtrado/autorización de rutas de argv, segunda instancia y arrastre en `src-tauri/tests/lifecycle.rs`
-- [ ] T085 [P] [US5] Tests del manejador `app://open-files` (sin duplicados, rechazados) en `tests/unit/open-files.spec.ts`
+- [x] T085 [P] [US5] Tests del manejador `app://open-files` (sin duplicados, rechazados) en `tests/unit/open-files.spec.ts`
 - [x] T086 [P] [US5] E2E nativo de segunda instancia y arrastre en `tests/e2e/native/os-integration.spec.ts`
 
 ### Implementación
@@ -267,8 +267,8 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T110 [P] Medir y documentar SC-001…SC-003 en equipo de referencia con `scripts/perf/measure.ps1` → `docs/performance.md`
 - [x] T111 [P] Revisión de seguridad: permisos mínimos de `capabilities/default.json`, CSP, ausencia de `plugin-fs` en el frontend y de ejecución de procesos, en `docs/security-review.md`
 - [x] T112 [P] Documentar limitaciones de `mdwysiwyg` (normalización, historial por pestaña, pool) en `docs/mdwysiwyg-limitations.md` y `README.md`
-- [ ] T113 [P] Accesibilidad básica de menú, pestañas y diálogos (roles ARIA, foco, teclado) en `src/ui/` y `src/features/tabs/`
-- [ ] T114 Revisar dependencias (justificación y tamaño) y eliminar las no usadas en `package.json` y `src-tauri/Cargo.toml` (Principio I/IX)
+- [x] T113 [P] Accesibilidad básica de menú, pestañas y diálogos (roles ARIA, foco, teclado) en `src/ui/` y `src/features/tabs/`
+- [x] T114 Revisar dependencias (justificación y tamaño) y eliminar las no usadas en `package.json` y `src-tauri/Cargo.toml` (Principio I/IX)
 - [ ] T115 Suite E2E completa (UI + nativa) pasando en CI en `.github/workflows/ci.yml`
 - [ ] T116 `npm run tauri build`: generar instalador NSIS y validar V1–V15 de quickstart.md en una máquina sin Node/Rust (SC-009, SC-010)
 - [ ] T117 Actualizar `specs/001-markdown-desktop-editor/spec.md` y `plan.md` con los resultados de spikes y mediciones; cerrar ítems pendientes de Assumptions (umbral de tamaño, codificaciones soportadas)

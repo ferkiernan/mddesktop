@@ -3,7 +3,7 @@ import { useDocuments } from "../features/documents/store";
 export function StatusBar() {
   const doc = useDocuments((s) => (s.activeId ? s.docs[s.activeId] : null));
   return (
-    <footer className="app-status">
+    <footer className="app-status" role="status" aria-live="polite">
       {doc ? (
         <>
           <span title={doc.filePath ?? undefined}>{doc.filePath ?? doc.fileName}</span>

@@ -21,7 +21,32 @@ export function TabBar({ onNew, onClose }: TabBarProps) {
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
 
   return (
-    <div className="app-tabs" role="tablist" aria-label="Documentos abiertos">
+    <div
+      className="app-tabs"
+      role="tablist"
+      aria-label="Documentos abiertos"
+      aria-orientation="horizontal"
+      onKeyDown={(e) => {
+        // roving tabindex: arrows/Home/End move between tabs, Delete closes the active one
+        if (!order.length || (e.target as HTMLElement).closest(".tab-close")) return;
+        const i = activeId ? order.indexOf(activeId) : 0;
+        let next: number | null = null;
+        if (e.key === "ArrowRight") next = (i + 1) % order.length;
+        else if (e.key === "ArrowLeft") next = (i - 1 + order.length) % order.length;
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = order.length - 1;
+        else if (e.key === "Delete" && activeId) {
+          e.preventDefault();
+          onClose([activeId]);
+          return;
+        }
+        if (next !== null) {
+          e.preventDefault();
+          setActive(order[next]);
+          queueMicrotask(() => document.querySelector<HTMLElement>("[role=tab][aria-selected=true]")?.focus());
+        }
+      }}
+    >
       {order.map((id, i) => (
         <Tab
           key={id}
