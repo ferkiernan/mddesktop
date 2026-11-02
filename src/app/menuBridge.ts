@@ -3,6 +3,8 @@ import { newDocument, openFiles, save, saveAs } from "../features/documents/acti
 import { requestClose, requestCloseAll, requestExit } from "../features/documents/closeFlow";
 import { useDocuments } from "../features/documents/store";
 import { activateNext } from "../features/tabs/tabs";
+import { runEdit } from "../features/editor/editCommands";
+import { toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
 import type { MenuActionId } from "../services/contracts";
 
 export function runMenuAction(id: MenuActionId) {
@@ -35,8 +37,31 @@ export function runMenuAction(id: MenuActionId) {
     case "tab.prev":
       activateNext(-1);
       return;
+    case "edit.undo":
+    case "edit.redo":
+    case "edit.cut":
+    case "edit.copy":
+    case "edit.paste":
+    case "edit.selectAll":
+      void runEdit(id.slice(5) as Parameters<typeof runEdit>[0]);
+      return;
+    case "view.toggleTheme":
+      void toggleTheme();
+      return;
+    case "view.zoomIn":
+      void zoomIn();
+      return;
+    case "view.zoomOut":
+      void zoomOut();
+      return;
+    case "view.zoomReset":
+      void zoomReset();
+      return;
+    case "view.toggleStatusBar":
+      void toggleStatusBar();
+      return;
     default:
-      return; // other actions arrive with their stories
+      return;
   }
 }
 

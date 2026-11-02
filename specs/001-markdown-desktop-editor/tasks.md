@@ -223,18 +223,18 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T093 [P] [US6] Tests del Keyboard Shortcut Manager (mapa Ctrl/Cmd, no interceptar Ctrl+Z/Y con foco en el editor) en `tests/unit/shortcuts.spec.ts`
-- [ ] T094 [P] [US6] Tests de tema, zoom y barra de estado con persistencia en `tests/unit/appearance.spec.ts`
-- [ ] T095 [P] [US6] E2E de UI de atajos y menús en `tests/e2e/ui/shortcuts-menus.spec.ts`
+- [x] T093 [P] [US6] Tests del Keyboard Shortcut Manager (mapa Ctrl/Cmd, no interceptar Ctrl+Z/Y con foco en el editor) en `tests/unit/shortcuts.spec.ts`
+- [x] T094 [P] [US6] Tests de tema, zoom y barra de estado con persistencia en `tests/unit/appearance.spec.ts`
+- [x] T095 [P] [US6] E2E de UI de atajos y menús en `tests/e2e/ui/shortcuts-menus.spec.ts`
 
 ### Implementación
 
-- [ ] T096 [US6] Menús Edición y Ver (según decisión de S4) en `src-tauri/src/services/menu.rs`
-- [ ] T097 [US6] Keyboard Shortcut Manager (Ctrl+N/O/S/Shift+S/W, Ctrl+Tab, Ctrl+Shift+Tab; Cmd en macOS) en `src/features/shortcuts/manager.ts`
-- [ ] T098 [US6] Comandos de Edición hacia el editor activo (cortar/copiar/pegar/seleccionar todo/deshacer/rehacer) en `src/features/editor/editCommands.ts`
-- [ ] T099 [P] [US6] Tema claro/oscuro con variables `--mdw-*` y persistencia en `src/features/settings/theme.ts`
-- [ ] T100 [P] [US6] Zoom de interfaz (0.7–2.0) en `src/features/settings/zoom.ts`
-- [ ] T101 [US6] Mostrar/ocultar barra de estado en `src/ui/StatusBar.tsx` y `src/features/settings/store.ts`
+- [x] T096 [US6] Menús Edición y Ver (según decisión de S4) en `src-tauri/src/services/menu.rs`
+- [x] T097 [US6] Keyboard Shortcut Manager (Ctrl+N/O/S/Shift+S/W, Ctrl+Tab, Ctrl+Shift+Tab; Cmd en macOS) en `src/features/shortcuts/manager.ts`
+- [x] T098 [US6] Comandos de Edición hacia el editor activo (cortar/copiar/pegar/seleccionar todo/deshacer/rehacer) en `src/features/editor/editCommands.ts`
+- [x] T099 [P] [US6] Tema claro/oscuro con variables `--mdw-*` y persistencia en `src/features/settings/theme.ts`
+- [x] T100 [P] [US6] Zoom de interfaz (0.7–2.0) en `src/features/settings/zoom.ts`
+- [x] T101 [US6] Mostrar/ocultar barra de estado en `src/ui/StatusBar.tsx` y `src/features/settings/store.ts`
 
 ---
 

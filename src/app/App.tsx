@@ -5,7 +5,8 @@ import { EditorHost } from "../features/editor/EditorHost";
 import { StatusBar } from "../ui/StatusBar";
 import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
-import { startMenuBridge } from "./menuBridge";
+import { runMenuAction, startMenuBridge } from "./menuBridge";
+import { startShortcuts } from "../features/shortcuts/manager";
 import { events } from "../services/events";
 import { TabBar } from "../features/tabs/TabBar";
 import { newDocument } from "../features/documents/actions";
@@ -39,7 +40,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 function useAppLifecycle() {
   useEffect(() => {
     let cancelled = false;
-    const stops: (() => void)[] = [startMenuBridge(), startReloadUndo()];
+    const stops: (() => void)[] = [startMenuBridge(), startReloadUndo(), startShortcuts(runMenuAction)];
 
     let unlistenClose: (() => void) | undefined;
     events
