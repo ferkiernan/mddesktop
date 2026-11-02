@@ -26,7 +26,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 **Purpose**: entorno y esqueleto del proyecto
 
 - [ ] T001 Instalar Rust (rustup), Visual Studio Build Tools (C++) y verificar WebView2; registrar versiones en `docs/dev-setup.md` (ver quickstart.md §1)
-- [ ] T002 Crear el proyecto Tauri 2 + React 18.3 + TypeScript + Vite en la raíz (`package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`, `src/main.tsx`, `src-tauri/`)
+- [x] T002 Crear el proyecto Tauri 2 + React 18.3 + TypeScript + Vite en la raíz (`package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`, `src/main.tsx`, `src-tauri/`)
 - [ ] T003 Agregar dependencias: `zustand`, `zod`, `mdwysiwyg` en `package.json`; en `src-tauri/Cargo.toml`: `tauri-plugin-dialog`, `tauri-plugin-single-instance`, `tauri-plugin-window-state`, `serde`, `serde_json`, `notify`, `notify-debouncer-mini`, `encoding_rs`, `chardetng`, `xxhash-rust`, `thiserror`, `uuid`
 - [ ] T004 Crear el esqueleto de carpetas de plan.md (`src/app`, `src/features/{documents,tabs,editor,session,settings,shortcuts,images}`, `src/services`, `src/ui`, `src-tauri/src/{commands,services,platform}`, `tests/{unit,components,e2e,fixtures}`, `scripts/perf`, `docs`)
 - [ ] T005 [P] Configurar ESLint + Prettier (`eslint.config.js`, `.prettierrc`) y `rustfmt.toml` + clippy en `src-tauri/`
