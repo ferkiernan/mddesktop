@@ -17,7 +17,7 @@
 html, body, #root { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font: 14px var(--ui-font, system-ui, sans-serif); overflow: hidden; }
 .app { display: flex; flex-direction: column; height: 100%; }
-.app-tabs { min-height: 34px; background: var(--bar-bg, var(--muted)); color: var(--bar-fg, var(--fg)); border-bottom: 1px solid var(--border); }
+.app-tabs { box-sizing: border-box; height: 25px; min-height: 25px; max-height: 25px; background: var(--bar-bg, var(--muted)); color: var(--bar-fg, var(--fg)); border-bottom: 1px solid var(--border); }
 .app-main { flex: 1; min-height: 0; overflow: hidden; }
 .app-status { min-height: 24px; padding: 2px 10px; background: var(--bar-bg, var(--muted)); color: var(--bar-fg, var(--fg)); border-top: 1px solid var(--border); font-size: 12px; }
 .empty-state { height: 100%; display: grid; place-content: center; text-align: center; color: #6b7280; }
@@ -31,16 +31,17 @@ body { background: var(--bg); color: var(--fg); font: 14px var(--ui-font, system
 .toast { position: fixed; bottom: 36px; right: 16px; background: #111827; color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 60; }
 .editor-slot { height: 100%; }
 .editor-slot[hidden] { display: none; }
-.app-tabs { display: flex; align-items: stretch; overflow-x: auto; }
-.tab { display: flex; align-items: center; gap: 6px; padding: 0 8px 0 12px; max-width: 220px; border-right: 1px solid var(--border); cursor: default; user-select: none; background: transparent; color: var(--bar-fg, var(--fg)); }
-.tab[aria-selected="true"] { background: var(--bg); color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
+.app-tabs { display: flex; align-items: flex-end; gap: 2px; padding: 2px 4px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+/* Tabs: rounded top corners, no close button (middle click or Delete closes) */
+.tab { display: flex; align-items: center; gap: 6px; height: 23px; box-sizing: border-box; padding: 0 12px; font-size: 12px; max-width: 220px; border: 1px solid transparent; border-bottom: 0; border-radius: 8px 8px 0 0; cursor: default; user-select: none; background: color-mix(in srgb, var(--bar-fg, var(--fg)) 8%, transparent); color: var(--bar-fg, var(--fg)); }
+.tab:hover { background: color-mix(in srgb, var(--bar-fg, var(--fg)) 16%, transparent); }
+.tab[aria-selected="true"] { background: var(--bg); color: var(--fg); border-color: var(--border); box-shadow: 0 -2px 0 var(--accent) inset; }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tab .tab-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tab .tab-dirty { color: var(--accent); }
-.tab .tab-close { border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 4px; padding: 0 4px; }
-.tab .tab-close:hover { background: var(--border); }
+.tab .tab-dirty { color: #e5484d; font-size: 11px; line-height: 1; }
 .tab.drop-before { box-shadow: inset 3px 0 0 var(--accent); }
 .tab.dragging { opacity: .6; }
-.tab-new { border: 0; background: transparent; color: var(--bar-fg, var(--fg)); padding: 0 12px; cursor: pointer; }
 .ctx-menu { position: fixed; z-index: 70; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px; min-width: 160px; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
 .ctx-menu button { display: block; width: 100%; text-align: left; border: 0; background: transparent; color: var(--fg); padding: 6px 10px; cursor: pointer; border-radius: 4px; }
 .ctx-menu button:hover { background: var(--muted); }
+.editor-interaction { height: 100%; }

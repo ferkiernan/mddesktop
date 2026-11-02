@@ -12,6 +12,8 @@ interface DocumentsState {
   addOpened(r: ReadResult): string;
   findByPath(path: string): EditorDocument | undefined;
   setContent(id: string, content: string): void;
+  /** The editor re-serialized an unedited document: remember that form as the clean baseline. */
+  noteCanonical(id: string, markdown: string): void;
   markSaved(id: string, saved: { content: string; fingerprint: FileFingerprint; filePath?: string; encoding?: string; bom?: boolean }): void;
   setActive(id: string): void;
   close(id: string): void;
@@ -26,7 +28,8 @@ interface DocumentsState {
   restoreSnapshot(id: string): boolean;
 }
 
-const dirty = (content: string, saved: string) => content !== saved;
+const dirty = (content: string, saved: string, canonical: string | null = null) =>
+  content !== saved && content !== canonical;
 
 export const useDocuments = create<DocumentsState>((set, get) => ({
   docs: {},
@@ -51,6 +54,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
       externalState: "none",
       revision: 0,
       reloadSnapshot: null,
+      canonical: null,
     };
     set((s) => ({
       docs: { ...s.docs, [id]: doc },
@@ -83,6 +87,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
       externalState: "none",
       revision: 0,
       reloadSnapshot: null,
+      canonical: null,
     };
     set((s) => ({ docs: { ...s.docs, [id]: doc }, order: [...s.order, id], activeId: id }));
     return id;
@@ -97,8 +102,17 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
     set((s) => {
       const d = s.docs[id];
       if (!d || d.content === content) return s;
-      const next = { ...d, content, isDirty: dirty(content, d.savedContent), reloadSnapshot: null };
+      const next = { ...d, content, isDirty: dirty(content, d.savedContent, d.canonical), reloadSnapshot: null };
       return { docs: { ...s.docs, [id]: next } };
+    });
+  },
+
+  noteCanonical(id, markdown) {
+    set((s) => {
+      const d = s.docs[id];
+      // only meaningful while the document is still unmodified
+      if (!d || d.isDirty || d.canonical === markdown || markdown === d.savedContent) return s;
+      return { docs: { ...s.docs, [id]: { ...d, canonical: markdown } } };
     });
   },
 
@@ -112,7 +126,8 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
         filePath,
         fileName: filePath ? fileNameOf(filePath) : d.fileName,
         savedContent: saved.content,
-        isDirty: dirty(d.content, saved.content),
+        isDirty: dirty(d.content, saved.content, null),
+        canonical: null,
         fingerprint: saved.fingerprint,
         lastModified: saved.fingerprint.mtimeMs,
         encoding: saved.encoding ?? d.encoding,
@@ -152,6 +167,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
         externalState: "none",
         revision: d.revision + 1,
         reloadSnapshot: d.content,
+        canonical: null,
       };
       return { docs: { ...s.docs, [id]: next } };
     });
@@ -164,7 +180,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
     set((s) => ({
       docs: {
         ...s.docs,
-        [id]: { ...d, content, isDirty: content !== d.savedContent, revision: d.revision + 1, reloadSnapshot: null },
+        [id]: { ...d, content, isDirty: dirty(content, d.savedContent, d.canonical), revision: d.revision + 1, reloadSnapshot: null },
       },
     }));
     return true;

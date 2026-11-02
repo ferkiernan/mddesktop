@@ -26,9 +26,18 @@ export function TabBar({ onNew, onClose }: TabBarProps) {
       role="tablist"
       aria-label="Documentos abiertos"
       aria-orientation="horizontal"
+      title="Clic central en un espacio vacío: documento nuevo"
+      // middle button: autoscroll off; on EMPTY bar space it opens a new temporary (unsaved) document
+      onMouseDown={(e) => e.button === 1 && e.preventDefault()}
+      onAuxClick={(e) => {
+        if (e.button === 1 && e.target === e.currentTarget) {
+          e.preventDefault();
+          onNew();
+        }
+      }}
       onKeyDown={(e) => {
         // roving tabindex: arrows/Home/End move between tabs, Delete closes the active one
-        if (!order.length || (e.target as HTMLElement).closest(".tab-close")) return;
+        if (!order.length) return;
         const i = activeId ? order.indexOf(activeId) : 0;
         let next: number | null = null;
         if (e.key === "ArrowRight") next = (i + 1) % order.length;
@@ -68,9 +77,6 @@ export function TabBar({ onNew, onClose }: TabBarProps) {
           }}
         />
       ))}
-      <button className="tab-new" aria-label="Nuevo documento" onClick={onNew}>
-        +
-      </button>
       {menu && (
         <TabContextMenu
           x={menu.x}

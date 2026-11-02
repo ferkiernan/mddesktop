@@ -10,6 +10,7 @@ export function EditorHost() {
   const order = useDocuments((s) => s.order);
   const activeId = useDocuments((s) => s.activeId);
   const setContent = useDocuments((s) => s.setContent);
+  const noteCanonical = useDocuments((s) => s.noteCanonical);
   const [stored, setStored] = useState<string[]>([]);
 
   // Derived state: remember the pool for the next activation (allowed during render).
@@ -36,6 +37,7 @@ export function EditorHost() {
               initialContent={doc.content}
               revision={doc.revision}
               onChange={(md) => setContent(id, md)}
+              onNormalized={(md) => noteCanonical(id, md)}
             />
           </div>
         );

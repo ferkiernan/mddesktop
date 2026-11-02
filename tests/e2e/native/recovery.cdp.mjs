@@ -48,7 +48,7 @@ const kill = () => { try { execSync(`taskkill /F /T /IM ${exeName}`, { stdio: "i
 // --- run 1: create a document, type, wait for the recovery write, crash ---
 let app = await launch();
 await sleep(2500);
-await app.evalJs(`document.querySelector(".tab-new").click()`);
+await app.evalJs(`document.querySelector(".app-tabs").dispatchEvent(new MouseEvent("auxclick", { button: 1, bubbles: true, cancelable: true }))`);
 await sleep(2000);
 await app.evalJs(`document.querySelector(".editor-slot:not([hidden]) .ProseMirror").focus()`);
 await app.send("Input.insertText", { text: "texto sin guardar para recuperar" });

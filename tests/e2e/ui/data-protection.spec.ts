@@ -17,20 +17,20 @@ async function openDirty(page: Page) {
 
 test("closing a modified tab asks Guardar / Descartar / Cancelar", async ({ page }) => {
   await openDirty(page);
-  await page.getByRole("button", { name: "Cerrar a.md" }).click();
+  await page.getByRole("tab", { name: /a\.md/ }).click({ button: "middle" });
   const dialog = page.getByRole("dialog", { name: "Cambios sin guardar" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(page.getByRole("tab", { name: /a\.md/ })).toBeVisible(); // still open
 
-  await page.getByRole("button", { name: "Cerrar a.md" }).click();
+  await page.getByRole("tab", { name: /a\.md/ }).click({ button: "middle" });
   await page.getByRole("dialog").getByRole("button", { name: "Descartar" }).click();
   await expect(page.getByRole("tab")).toHaveCount(0);
 });
 
 test("Escape on the close dialog cancels (safe default)", async ({ page }) => {
   await openDirty(page);
-  await page.getByRole("button", { name: "Cerrar a.md" }).click();
+  await page.getByRole("tab", { name: /a\.md/ }).click({ button: "middle" });
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);

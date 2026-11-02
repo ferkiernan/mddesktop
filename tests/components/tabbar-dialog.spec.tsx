@@ -25,24 +25,35 @@ describe("TabBar", () => {
     seed();
     render(<TabBar onNew={vi.fn()} onClose={vi.fn()} />);
     const tabs = screen.getAllByRole("tab");
-    expect(tabs.map((t) => t.textContent)).toEqual(["Sin título 1×", "Sin título 2●×", "Sin título 3×"]);
+    expect(tabs.map((t) => t.textContent)).toEqual(["Sin título 1", "Sin título 2●", "Sin título 3"]);
     expect(tabs[0]).toHaveAttribute("aria-selected", "true");
     expect(tabs[1]).toHaveAttribute("aria-selected", "false");
     expect(screen.getByRole("img", { name: "Cambios sin guardar" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cerrar Sin título 2" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Cerrar/ })).toBeNull(); // tabs have no close button
   });
 
-  it("activates on click, creates a new tab and closes through onClose", () => {
+  it("activates on click, creates a new tab and closes with the middle button", () => {
     const [, b] = seed();
     const onNew = vi.fn();
     const onClose = vi.fn();
     render(<TabBar onNew={onNew} onClose={onClose} />);
     fireEvent.click(screen.getAllByRole("tab")[1]);
     expect(useDocuments.getState().activeId).toBe(b);
-    fireEvent.click(screen.getByRole("button", { name: "Nuevo documento" }));
-    expect(onNew).toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar Sin título 2" }));
+    expect(screen.queryByRole("button", { name: /Nuevo/ })).toBeNull(); // no "+" button
+    const list = screen.getByRole("tablist");
+    const aux = (button: number) => new MouseEvent("auxclick", { button, bubbles: true, cancelable: true });
+    fireEvent(screen.getAllByRole("tab")[0], aux(1)); // middle click ON a tab closes it, never creates one
+    expect(onNew).not.toHaveBeenCalled();
+    fireEvent(list, aux(2)); // other buttons on empty space: nothing
+    expect(onNew).not.toHaveBeenCalled();
+    fireEvent(list, aux(1)); // middle click on empty bar space: new temporary document
+    expect(onNew).toHaveBeenCalledTimes(1);
+    onClose.mockClear();
+    fireEvent(screen.getAllByRole("tab")[1], aux(1)); // middle click closes the tab under the pointer
     expect(onClose).toHaveBeenCalledWith([b]);
+    onClose.mockClear();
+    fireEvent(screen.getAllByRole("tab")[1], aux(2)); // any other aux button is ignored
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("closes others / all from the context menu", () => {

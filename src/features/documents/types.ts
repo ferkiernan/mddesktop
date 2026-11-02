@@ -17,6 +17,12 @@ export interface EditorDocument {
   revision: number;
   /** Content before a reload; lets Ctrl+Z restore it when the editor cannot (FR-014a fallback). */
   reloadSnapshot: string | null;
+  /**
+   * The editor re-serializes Markdown canonically (e.g. table separators), so its output for an
+   * UNEDITED document can differ from the file text. We learn that canonical form from the first
+   * non-edit emission and treat it as "not modified" (also after undoing back to it).
+   */
+  canonical: string | null;
 }
 
 export function fileNameOf(path: string): string {

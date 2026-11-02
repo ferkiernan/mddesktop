@@ -16,6 +16,7 @@ export interface TabProps {
   onContextMenu(e: React.MouseEvent): void;
 }
 
+/** A tab has no close button: middle click, Delete (focused tab) or the context menu close it. */
 export function Tab({ doc, active, dropBefore, dragging, register, handlers, onActivate, onClose, onContextMenu }: TabProps) {
   const cls = ["tab", dropBefore && "drop-before", dragging && "dragging"].filter(Boolean).join(" ");
   return (
@@ -25,9 +26,15 @@ export function Tab({ doc, active, dropBefore, dragging, register, handlers, onA
       aria-selected={active}
       tabIndex={active ? 0 : -1}
       className={cls}
-      title={doc.filePath ?? doc.fileName}
+      title={`${doc.filePath ?? doc.fileName} — clic central para cerrar`}
       onClick={onActivate}
-      onAuxClick={(e) => e.button === 1 && onClose()}
+      // keep the browser from starting middle-button autoscroll
+      onMouseDown={(e) => e.button === 1 && e.preventDefault()}
+      onAuxClick={(e) => {
+        if (e.button !== 1) return;
+        e.preventDefault();
+        onClose();
+      }}
       onContextMenu={onContextMenu}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onActivate()}
       {...handlers}
@@ -38,17 +45,6 @@ export function Tab({ doc, active, dropBefore, dragging, register, handlers, onA
           ●
         </span>
       )}
-      <button
-        className="tab-close"
-        aria-label={`Cerrar ${doc.fileName}`}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-      >
-        ×
-      </button>
     </div>
   );
 }
