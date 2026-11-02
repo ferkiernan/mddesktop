@@ -1,0 +1,213 @@
+diff --git a/src/components/MarkdownEditor/MarkdownEditor.tsx b/src/components/MarkdownEditor/MarkdownEditor.tsx
+index 7c3af64..fb46240 100644
+--- a/src/components/MarkdownEditor/MarkdownEditor.tsx
++++ b/src/components/MarkdownEditor/MarkdownEditor.tsx
+@@ -60,6 +60,7 @@ export const MarkdownEditor = forwardRef<
+     onlyView = false,
+     resizable = true,
+     onlyViewNotice,
++    resolveImageSrc,
+   },
+   ref,
+ ) {
+@@ -84,10 +85,17 @@ export const MarkdownEditor = forwardRef<
+   onChangeRef.current = onChange;
+   const sourceRef = useRef(source);
+   sourceRef.current = source;
++  const resolveImageSrcRef = useRef(resolveImageSrc);
++  resolveImageSrcRef.current = resolveImageSrc;
++  const hasImageResolver = resolveImageSrc !== undefined;
+ 
+   const extensions = useMemo(
+-    () => createEditorExtensions({ sanitizeEmbeddedHtml }),
+-    [sanitizeEmbeddedHtml],
++    () =>
++      createEditorExtensions({
++        sanitizeEmbeddedHtml,
++        resolveImageSrc: hasImageResolver ? () => resolveImageSrcRef.current : undefined,
++      }),
++    [sanitizeEmbeddedHtml, hasImageResolver],
+   );
+ 
+   const editor = useEditor(
+@@ -231,8 +239,31 @@ export const MarkdownEditor = forwardRef<
+       isModified() {
+         return sourceRef.current !== originalContentRef.current;
+       },
++      insertMarkdown(markdown: string) {
++        const textarea = textareaRef.current;
++        if (effectiveViewMode === "markdown" && textarea) {
++          const start = textarea.selectionStart;
++          const end = textarea.selectionEnd;
++          const current = sourceRef.current;
++          handleSourceChange(current.slice(0, start) + markdown + current.slice(end));
++          return;
++        }
++        editor
++          ?.chain()
++          .focus()
++          .insertContent(markdownToEditorContent(markdown))
++          .run();
++      },
++      setMarkdown(markdown: string) {
++        sourceRef.current = markdown;
++        setSource(markdown);
++        editor?.commands.setContent(markdownToEditorContent(markdown), {
++          emitUpdate: false,
++        });
++        onChangeRef.current?.(markdown);
++      },
+     }),
+-    [editor],
++    [editor, effectiveViewMode],
+   );
+ 
+   const closeLinkPopover = () => setLinkPopover(null);
+diff --git a/src/components/MarkdownEditor/markdown/tiptapMarkdownBridge.ts b/src/components/MarkdownEditor/markdown/tiptapMarkdownBridge.ts
+index 2c81b03..4eac676 100644
+--- a/src/components/MarkdownEditor/markdown/tiptapMarkdownBridge.ts
++++ b/src/components/MarkdownEditor/markdown/tiptapMarkdownBridge.ts
+@@ -160,6 +160,38 @@ const CodeBlockWithMermaid = CodeBlockLowlight.extend({
+ 
+ export interface EditorExtensionOptions {
+   sanitizeEmbeddedHtml: boolean;
++  /**
++   * When set, images are displayed through this resolver (e.g. relative path -> asset URL).
++   * It is read lazily on every paint. Display only: the document keeps the original `src`,
++   * so the serialized Markdown never contains the resolved URL.
++   */
++  resolveImageSrc?: () => ((src: string) => string) | undefined;
++}
++
++function createResolvedImage(getResolver: NonNullable<EditorExtensionOptions["resolveImageSrc"]>) {
++  return Image.extend({
++    addNodeView() {
++      return ({ node }) => {
++        const img = document.createElement("img");
++        const paint = (attrs: Record<string, unknown>) => {
++          const src = String(attrs["src"] ?? "");
++          img.src = getResolver()?.(src) ?? src;
++          img.alt = String(attrs["alt"] ?? "");
++          if (attrs["title"]) img.title = String(attrs["title"]);
++          else img.removeAttribute("title");
++        };
++        paint(node.attrs);
++        return {
++          dom: img,
++          update(updated) {
++            if (updated.type.name !== node.type.name) return false;
++            paint(updated.attrs);
++            return true;
++          },
++        };
++      };
++    },
++  });
+ }
+ 
+ export function createEditorExtensions(
+@@ -175,7 +207,7 @@ export function createEditorExtensions(
+     TaskList,
+     TaskItem.configure({ nested: true }),
+     Link.configure({ openOnClick: false }),
+-    Image,
++    options.resolveImageSrc ? createResolvedImage(options.resolveImageSrc) : Image,
+     HtmlBlock.configure({ sanitize: options.sanitizeEmbeddedHtml }),
+   ];
+ }
+diff --git a/src/components/MarkdownEditor/types.ts b/src/components/MarkdownEditor/types.ts
+index 20dd82d..db26de4 100644
+--- a/src/components/MarkdownEditor/types.ts
++++ b/src/components/MarkdownEditor/types.ts
+@@ -21,6 +21,11 @@ export interface MarkdownEditorProps {
+   documentId?: string;
+   /** Nombre de archivo de uso libre para la app consumidora. */
+   fileName?: string;
++  /**
++   * Resuelve el `src` de las imágenes SOLO para mostrarlas (p. ej. ruta relativa -> URL
++   * servible). El Markdown conserva el `src` original. Debe pasarse desde el montaje.
++   */
++  resolveImageSrc?: (src: string) => string;
+ }
+ 
+ /** API imperativa expuesta por `ref` (ver contracts/MarkdownEditor.md de 005). */
+@@ -29,6 +34,13 @@ export interface MarkdownEditorHandle {
+   reset(): void;
+   /** Indica si el contenido actual difiere del contenido original. */
+   isModified(): boolean;
++  /** Inserta Markdown en la posición del cursor (o reemplaza la selección). Notifica `onChange`. */
++  insertMarkdown(markdown: string): void;
++  /**
++   * Reemplaza todo el contenido como un cambio deshacible en la vista renderizada
++   * (Ctrl+Z restaura el anterior). No modifica la base de `isModified()`. Notifica `onChange`.
++   */
++  setMarkdown(markdown: string): void;
+ }
+ 
+ export type ViewMode = "wysiwyg" | "markdown";
+diff --git a/tests/MarkdownEditor/host-integration.test.tsx b/tests/MarkdownEditor/host-integration.test.tsx
+new file mode 100644
+index 0000000..2203e38
+--- /dev/null
++++ b/tests/MarkdownEditor/host-integration.test.tsx
+@@ -0,0 +1,60 @@
++import { createRef } from "react";
++import { act, render, screen, waitFor } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { MarkdownEditor } from "../../src";
++import type { MarkdownEditorHandle } from "../../src";
++
++async function setup(
++  props: Partial<React.ComponentProps<typeof MarkdownEditor>> & { initialContent: string },
++) {
++  const ref = createRef<MarkdownEditorHandle>();
++  const onChange = vi.fn();
++  render(<MarkdownEditor ref={ref} onChange={onChange} {...props} />);
++  const pm = await screen.findByRole("textbox", { name: "Editor de texto enriquecido" });
++  return { ref, pm, onChange };
++}
++
++describe("host integration API (insertMarkdown / setMarkdown / resolveImageSrc)", () => {
++  it("insertMarkdown inserta en el cursor y notifica onChange con Markdown", async () => {
++    const { ref, pm, onChange } = await setup({ initialContent: "Hola" });
++    await userEvent.click(pm);
++    act(() => ref.current?.insertMarkdown("![gato](assets/gato.png)"));
++    await waitFor(() => expect(onChange).toHaveBeenCalled());
++    const last = onChange.mock.calls.at(-1)?.[0] as string;
++    expect(last).toContain("![gato](assets/gato.png)");
++    expect(last).toContain("Hola");
++    expect(pm.querySelector("img")).not.toBeNull();
++  });
++
++  it("resolveImageSrc cambia solo el src mostrado; el Markdown conserva el original", async () => {
++    const { ref, pm, onChange } = await setup({
++      initialContent: "![gato](assets/gato.png)",
++      resolveImageSrc: (src) => `asset://resolved/${src}`,
++    });
++    expect(pm.querySelector("img")?.getAttribute("src")).toBe("asset://resolved/assets/gato.png");
++    await userEvent.click(pm);
++    await userEvent.keyboard("x");
++    await waitFor(() => expect(onChange).toHaveBeenCalled());
++    const md = onChange.mock.calls.at(-1)?.[0] as string;
++    expect(md).toContain("(assets/gato.png)");
++    expect(md).not.toContain("asset://resolved");
++    expect(ref.current?.isModified()).toBe(true);
++  });
++
++  it("sin resolveImageSrc las imágenes se muestran como antes", async () => {
++    const { pm } = await setup({ initialContent: "![a](https://e.com/a.png)" });
++    expect(pm.querySelector("img")?.getAttribute("src")).toBe("https://e.com/a.png");
++  });
++
++  it("setMarkdown reemplaza el contenido, notifica y es deshacible con Ctrl+Z", async () => {
++    const { ref, pm, onChange } = await setup({ initialContent: "Original" });
++    await userEvent.click(pm);
++    act(() => ref.current?.setMarkdown("Del disco"));
++    expect(pm.textContent).toBe("Del disco");
++    expect(onChange).toHaveBeenLastCalledWith("Del disco");
++
++    await userEvent.click(pm);
++    await userEvent.keyboard("{Control>}z{/Control}");
++    await waitFor(() => expect(pm.textContent).toBe("Original"));
++  });
++});

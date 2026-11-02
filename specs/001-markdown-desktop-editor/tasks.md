@@ -250,7 +250,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 - [x] T102 [P] [US7] Tests Rust de `import_image` (copia, ruta relativa con `/`, homónimo sin sobrescribir, `resolve_image_url` acotado al directorio) en `src-tauri/tests/images.rs`
 - [x] T103 [P] [US7] Tests del flujo de imagen (documento sin ruta → Guardar como primero; cancelar no inserta) en `tests/unit/images.spec.ts`
-- [ ] T104 [P] [US7] E2E de inserción y portabilidad en `tests/e2e/native/images.spec.ts`
+- [x] T104 [P] [US7] E2E de inserción y portabilidad en `tests/e2e/native/images.spec.ts`
 
 ### Implementación
 

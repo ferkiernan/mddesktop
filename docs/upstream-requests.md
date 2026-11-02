@@ -14,3 +14,17 @@ fallbacks below, and switches automatically when the handle exposes the new meth
 | U5 | Bug: Tiptap warns `Duplicate extension names found: ['link']` on every mount | Console noise / possible misbehaviour | None needed |
 
 Open an issue per item in the `mdwysiwyg` repository and link it here when created.
+
+## Status (2026-11-02)
+
+U1 (`setMarkdown`), U2 (`insertMarkdown`) and U3 (`resolveImageSrc`) are implemented and tested in
+[`mdwysiwyg-host-api.patch`](mdwysiwyg-host-api.patch) (against `ferkiernan/mdwysiwyg` master; all 153 tests pass,
+4 new in `tests/MarkdownEditor/host-integration.test.tsx`). Nothing has been pushed or published upstream.
+
+To apply: `git apply docs/mdwysiwyg-host-api.patch` in a checkout of `mdwysiwyg`, update its README/CHANGELOG, bump to
+0.3.0, publish, then set `"mdwysiwyg": "^0.3.0"` here.
+
+Verified end to end in the real app with the patched build installed via `npm install --no-save <tarball>`:
+`node tests/e2e/native/images.cdp.mjs <exe>` renders `![foto](assets/mi%20foto.png)` through the `asset:` protocol
+(folder name and file name with spaces). Until 0.3 is published the app keeps working without it: "Insertar imagen…"
+explains that the editor cannot insert, and relative images are shown unresolved.
