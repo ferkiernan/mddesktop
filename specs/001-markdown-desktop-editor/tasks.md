@@ -248,17 +248,17 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T102 [P] [US7] Tests Rust de `import_image` (copia, ruta relativa con `/`, homónimo sin sobrescribir, `resolve_image_url` acotado al directorio) en `src-tauri/tests/images.rs`
-- [ ] T103 [P] [US7] Tests del flujo de imagen (documento sin ruta → Guardar como primero; cancelar no inserta) en `tests/unit/images.spec.ts`
+- [x] T102 [P] [US7] Tests Rust de `import_image` (copia, ruta relativa con `/`, homónimo sin sobrescribir, `resolve_image_url` acotado al directorio) en `src-tauri/tests/images.rs`
+- [x] T103 [P] [US7] Tests del flujo de imagen (documento sin ruta → Guardar como primero; cancelar no inserta) en `tests/unit/images.spec.ts`
 - [ ] T104 [P] [US7] E2E de inserción y portabilidad en `tests/e2e/native/images.spec.ts`
 
 ### Implementación
 
-- [ ] T105 [US7] Comandos `pick_image`, `import_image`, `resolve_image_url` en `src-tauri/src/commands/images.rs`
-- [ ] T106 [US7] Alcance del protocolo `asset:` limitado al directorio del documento en `src-tauri/tauri.conf.json` y `src-tauri/capabilities/default.json`
-- [ ] T107 [US7] Flujo "Insertar imagen…" (guardar primero, diálogo, copia a `assets/`, confirmar sobrescritura) en `src/features/images/insertImage.ts`
-- [ ] T108 [US7] Integrar `insertMarkdown` (U2) y `resolveImageSrc` (U3) en `src/features/editor/EditorAdapter.tsx`
-- [ ] T109 [US7] Acción de menú "Insertar imagen…" en `src-tauri/src/services/menu.rs` y `src/app/menuBridge.ts`
+- [x] T105 [US7] Comandos `pick_image`, `import_image`, `resolve_image_url` en `src-tauri/src/commands/images.rs`
+- [x] T106 [US7] Alcance del protocolo `asset:` limitado al directorio del documento en `src-tauri/tauri.conf.json` y `src-tauri/capabilities/default.json`
+- [x] T107 [US7] Flujo "Insertar imagen…" (guardar primero, diálogo, copia a `assets/`, confirmar sobrescritura) en `src/features/images/insertImage.ts`
+- [x] T108 [US7] Integrar `insertMarkdown` (U2) y `resolveImageSrc` (U3) en `src/features/editor/EditorAdapter.tsx`
+- [x] T109 [US7] Acción de menú "Insertar imagen…" en `src-tauri/src/services/menu.rs` y `src/app/menuBridge.ts`
 
 ---
 
