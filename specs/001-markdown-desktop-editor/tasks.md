@@ -118,20 +118,20 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T048 [P] [US2] Tests del reordenado y de cerrar otras/todas (lógica pura) en `tests/unit/tabs-store.spec.ts`
-- [ ] T049 [P] [US2] Tests del pool LRU (montar, ocultar, expulsar, remontar con contenido actual) en `tests/unit/editor-pool.spec.ts`
+- [x] T048 [P] [US2] Tests del reordenado y de cerrar otras/todas (lógica pura) en `tests/unit/tabs-store.spec.ts`
+- [x] T049 [P] [US2] Tests del pool LRU (montar, ocultar, expulsar, remontar con contenido actual) en `tests/unit/editor-pool.spec.ts`
 - [ ] T050 [P] [US2] Tests RTL de la barra de pestañas (nombre, indicador de cambios, cierre, activa, nueva) en `tests/components/tabbar.spec.tsx`
 - [ ] T051 [P] [US2] E2E de UI: abrir 3, alternar, reordenar, cerrar otras en `tests/e2e/ui/tabs.spec.ts`
 
 ### Implementación
 
-- [ ] T052 [US2] Slice de pestañas (orden, activa, mover, siguiente/anterior, cerrar otras/todas) en `src/features/tabs/store.ts`
-- [ ] T053 [P] [US2] Componentes `TabBar` y `Tab` en `src/features/tabs/TabBar.tsx` y `src/features/tabs/Tab.tsx`
-- [ ] T054 [US2] Hook de reordenado con Pointer Events (según decisión de S6) en `src/features/tabs/usePointerReorder.ts`
-- [ ] T055 [P] [US2] Menú contextual de pestaña (Cerrar, Cerrar otras, Cerrar todas) en `src/features/tabs/TabContextMenu.tsx`
-- [ ] T056 [US2] Pool LRU de editores montados (tamaño desde preferencias, ocultar con `display:none`, expulsar y remontar) en `src/features/editor/pool.ts` y `src/features/editor/EditorPool.tsx`
-- [ ] T057 [US2] Reemplazar `EditorHost` de instancia única por `EditorPool` y mantener la activa en foco en `src/features/editor/EditorHost.tsx`
-- [ ] T058 [US2] Botón de nueva pestaña y acciones siguiente/anterior en `src/features/tabs/TabBar.tsx` y `src/app/menuBridge.ts`
+- [x] T052 [US2] Slice de pestañas (orden, activa, mover, siguiente/anterior, cerrar otras/todas) en `src/features/tabs/store.ts`
+- [x] T053 [P] [US2] Componentes `TabBar` y `Tab` en `src/features/tabs/TabBar.tsx` y `src/features/tabs/Tab.tsx`
+- [x] T054 [US2] Hook de reordenado con Pointer Events (según decisión de S6) en `src/features/tabs/usePointerReorder.ts`
+- [x] T055 [P] [US2] Menú contextual de pestaña (Cerrar, Cerrar otras, Cerrar todas) en `src/features/tabs/TabContextMenu.tsx`
+- [x] T056 [US2] Pool LRU de editores montados (tamaño desde preferencias, ocultar con `display:none`, expulsar y remontar) en `src/features/editor/pool.ts` y `src/features/editor/EditorPool.tsx`
+- [x] T057 [US2] Reemplazar `EditorHost` de instancia única por `EditorPool` y mantener la activa en foco en `src/features/editor/EditorHost.tsx`
+- [x] T058 [US2] Botón de nueva pestaña y acciones siguiente/anterior en `src/features/tabs/TabBar.tsx` y `src/app/menuBridge.ts`
 
 **Checkpoint**: US1 + US2 funcionan juntas.
 
@@ -146,7 +146,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 ### Tests
 
 - [ ] T059 [P] [US3] Test Rust del watcher (modificado, eliminado, renombrado, debounce, ignorar escritura propia) en `src-tauri/tests/watcher.rs`
-- [ ] T060 [P] [US3] Tests del flujo de cierre (pestaña, todas, salir; Cancelar aborta) en `tests/unit/close-flow.spec.ts`
+- [x] T060 [P] [US3] Tests del flujo de cierre (pestaña, todas, salir; Cancelar aborta) en `tests/unit/close-flow.spec.ts`
 - [ ] T061 [P] [US3] Tests de resolución de conflicto (pisar, abrir en pestaña nueva sin ruta, recargar aquí; Ctrl+Z restaura) en `tests/unit/conflict.spec.ts`
 - [ ] T062 [P] [US3] E2E de UI de cierre con pendientes y de conflicto en `tests/e2e/ui/data-protection.spec.ts`
 
@@ -154,9 +154,9 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 - [ ] T063 [US3] Observador de archivos con `notify` + debounce (~300 ms), solo archivos abiertos, en `src-tauri/src/services/watcher.rs`
 - [ ] T064 [US3] Comando `watch_documents` y emisión de `fs://external-change` (ignora huella de escritura propia) en `src-tauri/src/commands/documents.rs`
-- [ ] T065 [US3] Ciclo de vida: interceptar cierre de ventana, emitir `app://close-requested`, comando `confirm_exit` en `src-tauri/src/services/lifecycle.rs` y `src-tauri/src/commands/app.rs`
-- [ ] T066 [US3] Flujo de cierre con pendientes (pestaña, otras, todas, salir) en `src/features/documents/closeFlow.ts`
-- [ ] T067 [P] [US3] `ConfirmCloseDialog` (Guardar/Descartar/Cancelar) en `src/ui/ConfirmCloseDialog.tsx`
+- [x] T065 [US3] Ciclo de vida: interceptar cierre de ventana, emitir `app://close-requested`, comando `confirm_exit` en `src-tauri/src/services/lifecycle.rs` y `src-tauri/src/commands/app.rs`
+- [x] T066 [US3] Flujo de cierre con pendientes (pestaña, otras, todas, salir) en `src/features/documents/closeFlow.ts`
+- [x] T067 [P] [US3] `ConfirmCloseDialog` (Guardar/Descartar/Cancelar) en `src/ui/ConfirmCloseDialog.tsx`
 - [ ] T068 [US3] Manejo de `externalState` en el store y re-chequeo de huella al recuperar el foco y antes de guardar en `src/features/documents/externalChanges.ts`
 - [ ] T069 [P] [US3] `ConflictDialog` con las 3 opciones en `src/ui/ConflictDialog.tsx`
 - [ ] T070 [US3] Acciones de conflicto: pisar (`overwriteExternal`), abrir versión del disco en pestaña nueva sin ruta, recargar en la pestaña actual en `src/features/documents/conflictActions.ts`

@@ -6,6 +6,10 @@ import { StatusBar } from "../ui/StatusBar";
 import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
 import { startMenuBridge } from "./menuBridge";
+import { events } from "../services/events";
+import { TabBar } from "../features/tabs/TabBar";
+import { newDocument } from "../features/documents/actions";
+import { requestClose, requestExit } from "../features/documents/closeFlow";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -26,10 +30,22 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 
 export default function App() {
   useEffect(() => startMenuBridge(), []);
+  useEffect(() => {
+    let un: (() => void) | undefined;
+    let stopped = false;
+    events
+      .onCloseRequested(() => void requestExit())
+      .then((u) => (stopped ? u() : (un = u)))
+      .catch(() => undefined);
+    return () => {
+      stopped = true;
+      un?.();
+    };
+  }, []);
   return (
     <ErrorBoundary>
       <div className="app">
-        <div className="app-tabs" role="tablist" aria-label="Documentos abiertos" />
+        <TabBar onNew={newDocument} onClose={(ids) => void requestClose(ids)} />
         <main className="app-main">{spikeEnabled ? <SpikeEditors /> : <EditorHost />}</main>
         <StatusBar />
         <ToastHost />

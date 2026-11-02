@@ -3,7 +3,7 @@ pub mod error;
 pub mod services;
 pub mod state;
 
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -22,12 +22,20 @@ pub fn run() {
             services::menu::setup(app)?;
             Ok(())
         })
+        .on_window_event(|window, event| {
+            // the frontend resolves unsaved changes, then calls confirm_exit
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.emit("app://close-requested", serde_json::json!({}));
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             commands::documents::pick_open_files,
             commands::documents::read_document,
             commands::documents::pick_save_path,
             commands::documents::write_document,
             commands::documents::stat_document,
+            commands::app::confirm_exit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

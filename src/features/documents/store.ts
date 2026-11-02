@@ -15,6 +15,8 @@ interface DocumentsState {
   markSaved(id: string, saved: { content: string; fingerprint: FileFingerprint; filePath?: string; encoding?: string; bom?: boolean }): void;
   setActive(id: string): void;
   close(id: string): void;
+  /** Moves a tab to `toIndex` in the order (drag and drop reorder). */
+  move(id: string, toIndex: number): void;
 }
 
 const dirty = (content: string, saved: string) => content !== saved;
@@ -113,6 +115,19 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
 
   setActive(id) {
     if (get().docs[id]) set({ activeId: id });
+  },
+
+  move(id, toIndex) {
+    set((s) => {
+      const from = s.order.indexOf(id);
+      if (from < 0) return s;
+      const to = Math.max(0, Math.min(toIndex, s.order.length - 1));
+      if (from === to) return s;
+      const order = s.order.slice();
+      order.splice(from, 1);
+      order.splice(to, 0, id);
+      return { order };
+    });
   },
 
   close(id) {

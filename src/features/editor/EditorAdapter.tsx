@@ -1,5 +1,5 @@
 // The only module that renders mdwysiwyg (contracts/editor-adapter.md).
-import { Suspense } from "react";
+import { memo, Suspense } from "react";
 import { LazyMarkdownEditor } from "./lazy";
 
 export interface EditorAdapterProps {
@@ -9,7 +9,7 @@ export interface EditorAdapterProps {
   onChange(markdown: string): void;
 }
 
-export function EditorAdapter({ documentId, initialContent, revision, onChange }: EditorAdapterProps) {
+function EditorAdapterImpl({ documentId, initialContent, revision, onChange }: EditorAdapterProps) {
   return (
     <Suspense fallback={<div className="editor-loading">Cargando editor…</div>}>
       <LazyMarkdownEditor
@@ -24,3 +24,9 @@ export function EditorAdapter({ documentId, initialContent, revision, onChange }
     </Suspense>
   );
 }
+
+// The library is uncontrolled: re-rendering on every keystroke (initialContent changes) is pure waste.
+export const EditorAdapter = memo(
+  EditorAdapterImpl,
+  (a, b) => a.documentId === b.documentId && a.revision === b.revision,
+);

@@ -1,6 +1,8 @@
 import { events } from "../services/events";
 import { newDocument, openFiles, save, saveAs } from "../features/documents/actions";
+import { requestClose, requestCloseAll, requestExit } from "../features/documents/closeFlow";
 import { useDocuments } from "../features/documents/store";
+import { activateNext } from "../features/tabs/tabs";
 import type { MenuActionId } from "../services/contracts";
 
 export function runMenuAction(id: MenuActionId) {
@@ -17,6 +19,21 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "file.saveAs":
       if (active) void saveAs(active);
+      return;
+    case "file.close":
+      if (active) void requestClose([active]);
+      return;
+    case "file.closeAll":
+      void requestCloseAll();
+      return;
+    case "file.exit":
+      void requestExit();
+      return;
+    case "tab.next":
+      activateNext(1);
+      return;
+    case "tab.prev":
+      activateNext(-1);
       return;
     default:
       return; // other actions arrive with their stories
