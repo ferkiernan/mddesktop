@@ -200,17 +200,17 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T084 [P] [US5] Tests Rust de filtrado/autorización de rutas de argv, segunda instancia y arrastre en `src-tauri/tests/lifecycle.rs`
+- [x] T084 [P] [US5] Tests Rust de filtrado/autorización de rutas de argv, segunda instancia y arrastre en `src-tauri/tests/lifecycle.rs`
 - [ ] T085 [P] [US5] Tests del manejador `app://open-files` (sin duplicados, rechazados) en `tests/unit/open-files.spec.ts`
-- [ ] T086 [P] [US5] E2E nativo de segunda instancia y arrastre en `tests/e2e/native/os-integration.spec.ts`
+- [x] T086 [P] [US5] E2E nativo de segunda instancia y arrastre en `tests/e2e/native/os-integration.spec.ts`
 
 ### Implementación
 
-- [ ] T087 [US5] `single-instance`: enfocar ventana y emitir `app://open-files` (`second-instance`) en `src-tauri/src/services/lifecycle.rs`
-- [ ] T088 [US5] Archivos por argumentos al arrancar (`get_launch_files`, `app://open-files` `argv`) en `src-tauri/src/services/lifecycle.rs` y `src-tauri/src/commands/app.rs`
-- [ ] T089 [US5] Arrastre de archivos manejado en Rust (`DragDrop`), filtrar `.md/.markdown`, autorizar y emitir `app://open-files`/`app://rejected-files` en `src-tauri/src/services/lifecycle.rs`
-- [ ] T090 [US5] `fileAssociations` para `.md` y `.markdown` y bundle NSIS (`embedBootstrapper`) en `src-tauri/tauri.conf.json`
-- [ ] T091 [US5] Manejador frontend de `app://open-files` y aviso de rechazados en `src/features/documents/openFilesHandler.ts`
+- [x] T087 [US5] `single-instance`: enfocar ventana y emitir `app://open-files` (`second-instance`) en `src-tauri/src/services/lifecycle.rs`
+- [x] T088 [US5] Archivos por argumentos al arrancar (`get_launch_files`, `app://open-files` `argv`) en `src-tauri/src/services/lifecycle.rs` y `src-tauri/src/commands/app.rs`
+- [x] T089 [US5] Arrastre de archivos manejado en Rust (`DragDrop`), filtrar `.md/.markdown`, autorizar y emitir `app://open-files`/`app://rejected-files` en `src-tauri/src/services/lifecycle.rs`
+- [x] T090 [US5] `fileAssociations` para `.md` y `.markdown` y bundle NSIS (`embedBootstrapper`) en `src-tauri/tauri.conf.json`
+- [x] T091 [US5] Manejador frontend de `app://open-files` y aviso de rechazados en `src/features/documents/openFilesHandler.ts`
 - [ ] T092 [P] [US5] Código específico de plataforma aislado en `src-tauri/src/platform/windows.rs` (y `mod.rs`)
 
 ---
