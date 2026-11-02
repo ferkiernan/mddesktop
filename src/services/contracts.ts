@@ -121,6 +121,10 @@ const BaseMenuActionIdSchema = z.enum([
   "file.closeAll",
   "file.exit",
   "insert.image",
+  "export.html",
+  "export.pdf",
+  "export.docx",
+  "export.odt",
   "edit.undo",
   "edit.redo",
   "edit.cut",
@@ -146,3 +150,7 @@ export const ImportResultSchema = z.object({
   existedBefore: z.boolean(),
 });
 export type ImportResult = z.infer<typeof ImportResultSchema>;
+
+export const ExportFormatSchema = z.enum(["html", "pdf", "docx", "odt"]);
+export type ExportFormat = z.infer<typeof ExportFormatSchema>;
+export const WriteExportResultSchema = z.object({ bytes: z.number().int().nonnegative() });

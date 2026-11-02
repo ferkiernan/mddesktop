@@ -6,7 +6,7 @@ import { activateNext } from "../features/tabs/tabs";
 import { insertImage } from "../features/images/insertImage";
 import { runEdit } from "../features/editor/editCommands";
 import { setEditorStyle, toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
-import type { MenuActionId } from "../services/contracts";
+import type { ExportFormat, MenuActionId } from "../services/contracts";
 
 export function runMenuAction(id: MenuActionId) {
   const active = useDocuments.getState().activeId;
@@ -37,6 +37,13 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "tab.prev":
       activateNext(-1);
+      return;
+    case "export.html":
+    case "export.pdf":
+    case "export.docx":
+    case "export.odt":
+      // loaded on demand: the export module is only needed when the user exports
+      void import("../features/export/exportDocument").then((m) => m.exportActiveDocument(id.slice(7) as ExportFormat));
       return;
     case "insert.image":
       void insertImage();

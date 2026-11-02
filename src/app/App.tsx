@@ -15,6 +15,7 @@ import { startExternalChangeWatcher } from "../features/documents/externalChange
 import { startOpenFilesHandler } from "../features/documents/openFilesHandler";
 import { startReloadUndo } from "../features/editor/reloadUndo";
 import { useSettings } from "../features/settings/store";
+import { useDocuments } from "../features/documents/store";
 import { restoreSession } from "../features/session/restore";
 import { startRecoveryWriter } from "../features/session/recoveryWriter";
 import { startSessionManager } from "../features/session/sessionManager";
@@ -39,6 +40,18 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 /** Startup: preferences -> restore previous session -> start the long-lived services. */
 function useAppLifecycle() {
   useEffect(() => {
+    // E2E builds only (scripts/build-test-exe.mjs sets VITE_E2E): lets native tests drive the export
+    // pipeline without the OS save dialog, which cannot be automated.
+    if (import.meta.env.VITE_E2E) {
+      (window as unknown as { __mdd?: unknown }).__mdd = {
+        exportApi: () => import("../features/export/exportDocument"),
+        rasterApi: () => import("../features/export/rasterize"),
+        snapshotApi: () => import("../features/export/snapshot"),
+        viewerApi: () => import("../features/export/viewer"),
+        paginateApi: () => import("../features/export/paginate"),
+        store: useDocuments,
+      };
+    }
     let cancelled = false;
     const stops: (() => void)[] = [startMenuBridge(), startReloadUndo(), startShortcuts(runMenuAction)];
 

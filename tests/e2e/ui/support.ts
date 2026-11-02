@@ -18,7 +18,7 @@ export async function installTauri(page: Page, responses: Responses) {
     const w = window as unknown as Record<string, unknown>;
     const calls: { cmd: string; args: unknown }[] = [];
     const callbacks = new Map<number, (e: unknown) => void>();
-    const listeners = new Map<string, number[]>();
+    const listeners = new Map<string, { eventId: number; handler: number }[]>();
     let nextId = 1;
     w.__responses = initial;
     w.__calls = calls;
@@ -34,9 +34,10 @@ export async function installTauri(page: Page, responses: Responses) {
         calls.push({ cmd, args });
         if (cmd === "plugin:event|listen") {
           const list = listeners.get(args.event as string) ?? [];
-          list.push(args.handler as number);
+          const eventId = nextId++;
+          list.push({ eventId, handler: args.handler as number });
           listeners.set(args.event as string, list);
-          return nextId++;
+          return eventId;
         }
         if (cmd.startsWith("plugin:event|")) return null;
         const r = (w.__responses as Record<string, unknown>)[cmd];
@@ -44,9 +45,14 @@ export async function installTauri(page: Page, responses: Responses) {
         return r === undefined ? null : r;
       },
     };
-    w.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener() {} };
+    // like the real bridge: unlistening really removes the listener (React StrictMode mounts twice in dev)
+    w.__TAURI_EVENT_PLUGIN_INTERNALS__ = {
+      unregisterListener(event: string, eventId: number) {
+        listeners.set(event, (listeners.get(event) ?? []).filter((l) => l.eventId !== eventId));
+      },
+    };
     w.__emit = (event: string, payload: unknown) => {
-      for (const h of listeners.get(event) ?? []) callbacks.get(h)?.({ event, id: 0, payload });
+      for (const l of listeners.get(event) ?? []) callbacks.get(l.handler)?.({ event, id: l.eventId, payload });
     };
   }, responses);
 }

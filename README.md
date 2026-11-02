@@ -10,6 +10,7 @@ Developed spec-first with [GitHub Spec Kit](https://github.com/github/spec-kit):
 - Unsaved-changes protection and crash recovery (~4 s)
 - Opens files from Explorer, drag and drop and the command line (single instance)
 - Light/dark theme, UI zoom, status bar toggle
+- Export to HTML (self-contained), PDF, Word (.docx) and OpenDocument (.odt), always A4: see [docs/export.md](docs/export.md)
 - Works offline; no telemetry
 
 ## Shortcuts

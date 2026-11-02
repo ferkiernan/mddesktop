@@ -4,6 +4,8 @@ import { z } from "zod";
 import {
   FileFingerprintSchema,
   ImportResultSchema,
+  WriteExportResultSchema,
+  type ExportFormat,
   PreferencesSchema,
   ReadResultSchema,
   RecoveryEntrySchema,
@@ -78,4 +80,11 @@ export const images = {
   pick: () => call("pick_image", z.string().nullable()),
   import: (documentPath: string, sourcePath: string, overwrite = false) =>
     call("import_image", ImportResultSchema, { documentPath, sourcePath, overwrite }),
+};
+
+export const exports_ = {
+  /** Native save dialog for an export; null when the user cancels. */
+  pickPath: (format: ExportFormat, suggestedName: string, directory?: string) =>
+    call("pick_export_path", z.string().nullable(), { format, suggestedName, directory }),
+  write: (path: string, dataBase64: string) => call("write_export", WriteExportResultSchema, { path, dataBase64 }),
 };
