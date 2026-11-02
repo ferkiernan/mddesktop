@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { baseResponses, calls, diskDoc, FP, installTauri, menu } from "./support";
+import { baseResponses, calls, diskDoc, FP, installTauri, menu , gotoApp } from "./support";
 
 const editor = (page: import("@playwright/test").Page) => page.locator(".editor-slot:not([hidden]) .ProseMirror");
 
@@ -9,7 +9,7 @@ test("open -> edit -> save writes the edited Markdown and clears the dirty marke
     read_document: diskDoc("C:\\docs\\a.md", "# Titulo\n\nTexto original\n"),
     write_document: { fingerprint: { ...FP, hash: "h2" } },
   }));
-  await page.goto("/");
+  await gotoApp(page);
 
   await menu(page, "file.open");
   await expect(page.getByRole("tab", { name: /a\.md/ })).toBeVisible();
@@ -35,7 +35,7 @@ test("Save As on a new document names the tab after the chosen file", async ({ p
     pick_save_path: "C:\\docs\\nota.md",
     write_document: { fingerprint: FP },
   }));
-  await page.goto("/");
+  await gotoApp(page);
   await page.keyboard.press("Control+n");
   await expect(page.getByRole("tab", { name: /Sin título 1/ })).toBeVisible();
   await editor(page).click();
@@ -51,7 +51,7 @@ test("opening the same file twice keeps a single tab", async ({ page }) => {
     pick_open_files: ["C:\\docs\\a.md"],
     read_document: diskDoc("C:\\docs\\a.md", "x\n"),
   }));
-  await page.goto("/");
+  await gotoApp(page);
   await menu(page, "file.open");
   await menu(page, "file.open");
   await expect(page.getByRole("tab")).toHaveCount(1);

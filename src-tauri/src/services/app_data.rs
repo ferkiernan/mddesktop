@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)] // files written by older versions lack new fields
 pub struct Preferences {
     pub version: u32,
     pub theme: String,
@@ -16,6 +16,8 @@ pub struct Preferences {
     pub last_directory: Option<String>,
     pub editor_pool_size: u32,
     pub large_file_warn_bytes: u64,
+    /// Editor style preset id (see src/features/settings/editorStyles.ts); unknown ids fall back in the UI.
+    pub editor_style: String,
 }
 
 impl Default for Preferences {
@@ -28,6 +30,7 @@ impl Default for Preferences {
             last_directory: None,
             editor_pool_size: 3,
             large_file_warn_bytes: 256 * 1024,
+            editor_style: "default".into(),
         }
     }
 }
@@ -40,6 +43,12 @@ impl Preferences {
         }
         self.ui_zoom = if self.ui_zoom.is_finite() { self.ui_zoom.clamp(0.7, 2.0) } else { 1.0 };
         self.editor_pool_size = self.editor_pool_size.clamp(1, 8);
+        let ok = !self.editor_style.is_empty()
+            && self.editor_style.len() <= 32
+            && self.editor_style.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+        if !ok {
+            self.editor_style = "default".into();
+        }
         if self.large_file_warn_bytes == 0 {
             self.large_file_warn_bytes = Preferences::default().large_file_warn_bytes;
         }
@@ -209,6 +218,19 @@ mod tests {
             .unwrap();
         assert_eq!((p.theme.as_str(), p.ui_zoom, p.editor_pool_size), ("dark", 2.0, 1));
         assert_eq!(a.load_settings().unwrap(), p);
+    }
+
+    #[test]
+    fn editor_style_is_validated_and_old_files_get_a_default() {
+        let d = tempfile::tempdir().unwrap();
+        let a = AppData::new(d.path());
+        // a settings.json written before the field existed still loads (not treated as corrupt)
+        std::fs::write(d.path().join("settings.json"), r#"{"version":1,"theme":"dark"}"#).unwrap();
+        let p = a.load_settings().unwrap();
+        assert_eq!((p.theme.as_str(), p.editor_style.as_str()), ("dark", "default"));
+        assert!(!std::fs::read_dir(d.path()).unwrap().any(|e| e.unwrap().file_name().to_string_lossy().contains("corrupt")));
+        assert_eq!(a.save_settings(&serde_json::json!({ "editorStyle": "winamp" })).unwrap().editor_style, "winamp");
+        assert_eq!(a.save_settings(&serde_json::json!({ "editorStyle": "../x; evil" })).unwrap().editor_style, "default");
     }
 
     #[test]

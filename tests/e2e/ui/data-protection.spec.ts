@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { baseResponses, diskDoc, emit, installTauri, menu, setResponse } from "./support";
+import { baseResponses, diskDoc, emit, installTauri, menu, setResponse , gotoApp } from "./support";
 
 const editor = (page: Page) => page.locator(".editor-slot:not([hidden]) .ProseMirror");
 
@@ -8,7 +8,7 @@ async function openDirty(page: Page) {
     pick_open_files: ["C:\\docs\\a.md"],
     read_document: diskDoc("C:\\docs\\a.md", "original\n"),
   }));
-  await page.goto("/");
+  await gotoApp(page);
   await menu(page, "file.open");
   await editor(page).click();
   await page.keyboard.type(" MIO");

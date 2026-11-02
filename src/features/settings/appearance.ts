@@ -1,10 +1,21 @@
+import { chromeOf, findStyle } from "./applyStyle";
 import { useSettings } from "./store";
 
 const ZOOM_STEP = 0.1;
 const round = (n: number) => Math.round(n * 100) / 100;
 
+/** Selects an editor style preset; `theme` follows the preset (light/dark chrome). */
+export const setEditorStyle = (id: string) => {
+  const style = findStyle(id);
+  return useSettings.getState().update({
+    editorStyle: style.id,
+    theme: chromeOf(style).dark ? "dark" : "light",
+  });
+};
+
+/** View > toggle light/dark: switches between the Default and Oscuro presets. */
 export const toggleTheme = () =>
-  useSettings.getState().update({ theme: useSettings.getState().prefs.theme === "dark" ? "light" : "dark" });
+  setEditorStyle(chromeOf(findStyle(useSettings.getState().prefs.editorStyle)).dark ? "default" : "dark");
 
 export const zoomBy = (delta: number) =>
   useSettings.getState().update({ uiZoom: Math.min(2, Math.max(0.7, round(useSettings.getState().prefs.uiZoom + delta))) });

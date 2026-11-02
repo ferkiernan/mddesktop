@@ -1,5 +1,6 @@
 // The only module that renders mdwysiwyg (contracts/editor-adapter.md).
 import { memo, Suspense, useEffect, useMemo, useRef } from "react";
+import { EDITOR_CLASS } from "../settings/applyStyle";
 import { makeImageResolver } from "../images/resolveSrc";
 import { registerEditor, type EditorCaps } from "./handles";
 import { LazyMarkdownEditor } from "./lazy";
@@ -53,6 +54,7 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange }: E
         width="100%"
         height="100%"
         resizable={false}
+        className={EDITOR_CLASS}
         {...upstream}
       />
     </Suspense>

@@ -5,7 +5,7 @@ import { useDocuments } from "../features/documents/store";
 import { activateNext } from "../features/tabs/tabs";
 import { insertImage } from "../features/images/insertImage";
 import { runEdit } from "../features/editor/editCommands";
-import { toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
+import { setEditorStyle, toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
 import type { MenuActionId } from "../services/contracts";
 
 export function runMenuAction(id: MenuActionId) {
@@ -65,6 +65,7 @@ export function runMenuAction(id: MenuActionId) {
       void toggleStatusBar();
       return;
     default:
+      if (id.startsWith("style.")) void setEditorStyle(id.slice(6));
       return;
   }
 }

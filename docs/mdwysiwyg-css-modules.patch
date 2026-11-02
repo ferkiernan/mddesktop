@@ -1,0 +1,14 @@
+diff --git a/tsup.config.ts b/tsup.config.ts
+index b5df728..44c4602 100644
+--- a/tsup.config.ts
++++ b/tsup.config.ts
+@@ -7,4 +7,9 @@ export default defineConfig({
+   sourcemap: true,
+   clean: true,
+   external: ["react", "react-dom"],
++  // tsup routes every `.css` import through its own plugin using this loader. The default
++  // ("css") bundles `*.module.css` as GLOBAL css and leaves the JS class map empty
++  // (`styles["root"] === undefined`), so consumers of the published package got an unstyled
++  // component. "local-css" emits hashed class names and the matching JS map.
++  loader: { ".css": "local-css" },
+ });

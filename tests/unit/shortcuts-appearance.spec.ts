@@ -54,7 +54,10 @@ describe("appearance (theme, zoom, status bar)", () => {
   beforeEach(() => {
     useSettings.setState({ prefs: DEFAULT_PREFS });
     // echo the patch back like the Rust command does
-    ipc = installMockIpc({ settings_save: (a) => ({ ...useSettings.getState().prefs, ...(a?.patch as object) }) });
+    ipc = installMockIpc({
+      settings_save: (a) => ({ ...useSettings.getState().prefs, ...(a?.patch as object) }),
+      set_style_menu: () => null,
+    });
   });
   afterEach(() => ipc.restore());
 
@@ -62,7 +65,7 @@ describe("appearance (theme, zoom, status bar)", () => {
     await toggleTheme();
     expect(useSettings.getState().prefs.theme).toBe("dark");
     expect(document.documentElement.dataset.theme).toBe("dark");
-    expect(ipc.calls.at(-1)).toMatchObject({ cmd: "settings_save", args: { patch: { theme: "dark" } } });
+    expect(ipc.calls.find((c) => c.cmd === "settings_save")).toMatchObject({ args: { patch: { theme: "dark", editorStyle: "dark" } } });
     await toggleTheme();
     expect(document.documentElement.dataset.theme).toBe("light");
   });

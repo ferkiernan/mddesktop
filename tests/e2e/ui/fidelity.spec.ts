@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
-import { baseResponses, diskDoc, FP, installTauri, menu, calls } from "./support";
+import { baseResponses, diskDoc, FP, installTauri, menu, calls , gotoApp } from "./support";
 
 const dir = join(process.cwd(), "tests", "fixtures", "markdown");
 const files = ["gfm-lf.md", "non-canonical.md", "mermaid.md"];
@@ -16,7 +16,7 @@ for (const name of files) {
       read_document: diskDoc(`C:\\f\\${name}`, text),
       write_document: { fingerprint: FP },
     }));
-    await page.goto("/");
+    await gotoApp(page);
     await menu(page, "file.open");
     await expect(page.locator(".editor-slot:not([hidden]) .ProseMirror")).toBeVisible();
     // switch to the Markdown view and back without editing
@@ -42,7 +42,7 @@ test("edited non-canonical Markdown is re-serialized (documented transformation)
     read_document: diskDoc("C:\\f\\nc.md", text),
     write_document: { fingerprint: FP },
   }));
-  await page.goto("/");
+  await gotoApp(page);
   await menu(page, "file.open");
   const ed = page.locator(".editor-slot:not([hidden]) .ProseMirror");
   await ed.click();

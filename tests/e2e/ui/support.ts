@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 export const FP = { mtimeMs: 1, size: 3, hash: "h1" };
 export const PREFS = {
   version: 1, theme: "light", uiZoom: 1, statusBarVisible: true,
-  lastDirectory: null, editorPoolSize: 3, largeFileWarnBytes: 5242880,
+  lastDirectory: null, editorPoolSize: 3, largeFileWarnBytes: 262144, editorStyle: "default",
 };
 
 export type Responses = Record<string, unknown>;
@@ -74,3 +74,11 @@ export const baseResponses = (extra: Responses = {}): Responses => ({
 export const diskDoc = (path: string, content: string, hash = "h1") => ({
   path, content, encoding: "utf-8", bom: false, eol: "lf", fingerprint: { ...FP, hash },
 });
+
+/** Loads the app and waits until startup registered its listeners (shortcuts start before settings load). */
+export async function gotoApp(page: Page) {
+  await page.goto("/");
+  await page.waitForFunction(() =>
+    (window as unknown as { __calls: { cmd: string }[] }).__calls.some((c) => c.cmd === "settings_load"),
+  );
+}

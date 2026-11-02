@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Preferences } from "../../services/contracts";
-import { settings } from "../../services/ipc";
+import { app, settings } from "../../services/ipc";
+import { applyEditorStyle } from "./applyStyle";
 
 export const DEFAULT_PREFS: Preferences = {
   version: 1,
@@ -10,6 +11,7 @@ export const DEFAULT_PREFS: Preferences = {
   lastDirectory: null,
   editorPoolSize: 3,
   largeFileWarnBytes: 256 * 1024,
+  editorStyle: "default",
 };
 
 interface SettingsState {
@@ -21,9 +23,9 @@ interface SettingsState {
 
 /** Applies theme and zoom to the document (CSS variables + `zoom`). */
 export function applyAppearance(p: Preferences) {
-  const root = document.documentElement;
-  root.dataset.theme = p.theme;
-  root.style.setProperty("zoom", String(p.uiZoom));
+  const style = applyEditorStyle(p.editorStyle);
+  document.documentElement.style.setProperty("zoom", String(p.uiZoom));
+  app.setStyleMenu(style.id).catch(() => undefined); // keep the native check mark in sync (no-op outside Tauri)
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({

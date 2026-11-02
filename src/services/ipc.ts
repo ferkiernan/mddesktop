@@ -71,6 +71,7 @@ export const settings = {
 export const app = {
   confirmExit: () => call("confirm_exit", Void),
   getLaunchFiles: () => call("get_launch_files", Paths),
+  setStyleMenu: (style: string) => call("set_style_menu", Void, { style }),
 };
 
 export const images = {

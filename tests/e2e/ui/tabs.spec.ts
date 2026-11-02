@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { baseResponses, installTauri } from "./support";
+import { baseResponses, installTauri , gotoApp } from "./support";
 
 const names = (page: import("@playwright/test").Page) => page.locator("[role=tab] .tab-name").allTextContents();
 
 test.beforeEach(async ({ page }) => {
   await installTauri(page, baseResponses());
-  await page.goto("/");
+  await gotoApp(page);
 });
 
 test("new tabs, switching, and at most 3 editors stay mounted", async ({ page }) => {

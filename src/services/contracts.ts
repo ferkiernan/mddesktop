@@ -68,6 +68,7 @@ export const PreferencesSchema = z.object({
   lastDirectory: z.string().nullable(),
   editorPoolSize: z.number().int().min(1).max(8),
   largeFileWarnBytes: z.number().int().positive(),
+  editorStyle: z.string().min(1).max(32),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
 
@@ -111,7 +112,7 @@ export const ExternalChangeEventSchema = z.object({
   kind: z.enum(["modified", "removed", "renamed"]),
   fingerprint: FileFingerprintSchema.optional(),
 });
-export const MenuActionIdSchema = z.enum([
+const BaseMenuActionIdSchema = z.enum([
   "file.new",
   "file.open",
   "file.save",
@@ -134,6 +135,8 @@ export const MenuActionIdSchema = z.enum([
   "tab.next",
   "tab.prev",
 ]);
+/** Fixed actions plus one `style.<presetId>` action per editor style (Configuración menu). */
+export const MenuActionIdSchema = BaseMenuActionIdSchema.or(z.string().regex(/^style\.[a-z0-9-]{1,32}$/));
 export type MenuActionId = z.infer<typeof MenuActionIdSchema>;
 export const MenuActionEventSchema = z.object({ id: MenuActionIdSchema });
 
