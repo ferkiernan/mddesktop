@@ -56,12 +56,12 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Capa de servicios del frontend
 
-- [ ] T018 [P] Esquemas Zod de todos los tipos y comandos de contracts/ en `src/services/contracts.ts`
-- [ ] T019 [P] Mapeo de `AppError` a errores de UI en `src/services/errors.ts`
-- [ ] T020 Wrappers tipados de `invoke` con validación Zod en `src/services/ipc.ts` (depende de T018, T019)
-- [ ] T021 [P] Suscripciones tipadas a eventos de ipc-events.md en `src/services/events.ts`
-- [ ] T022 [P] Helper `mockIpc` (`@tauri-apps/api/mocks`) y fixtures JSON compartidos en `tests/helpers/mockIpc.ts` y `tests/fixtures/ipc/`; corpus Markdown (LF, CRLF, BOM, Windows-1252, grande) en `tests/fixtures/markdown/`
-- [ ] T023 Application Shell: layout (menú nativo, zona de pestañas, editor, barra de estado), proveedores, error boundary y variables CSS de tema en `src/app/App.tsx` y `src/app/theme.css`
+- [x] T018 [P] Esquemas Zod de todos los tipos y comandos de contracts/ en `src/services/contracts.ts`
+- [x] T019 [P] Mapeo de `AppError` a errores de UI en `src/services/errors.ts`
+- [x] T020 Wrappers tipados de `invoke` con validación Zod en `src/services/ipc.ts` (depende de T018, T019)
+- [x] T021 [P] Suscripciones tipadas a eventos de ipc-events.md en `src/services/events.ts`
+- [x] T022 [P] Helper `mockIpc` (`@tauri-apps/api/mocks`) y fixtures JSON compartidos en `tests/helpers/mockIpc.ts` y `tests/fixtures/ipc/`; corpus Markdown (LF, CRLF, BOM, Windows-1252, grande) en `tests/fixtures/markdown/`
+- [x] T023 Application Shell: layout (menú nativo, zona de pestañas, editor, barra de estado), proveedores, error boundary y variables CSS de tema en `src/app/App.tsx` y `src/app/theme.css`
 
 ### Spikes (resultados en docs/spikes.md)
 
