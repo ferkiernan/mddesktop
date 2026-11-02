@@ -7,12 +7,16 @@ import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
 import { startMenuBridge } from "./menuBridge";
 import { events } from "../services/events";
-import { startExternalChangeWatcher } from "../features/documents/externalChanges";
-import { startOpenFilesHandler } from "../features/documents/openFilesHandler";
-import { startReloadUndo } from "../features/editor/reloadUndo";
 import { TabBar } from "../features/tabs/TabBar";
 import { newDocument } from "../features/documents/actions";
 import { requestClose, requestExit } from "../features/documents/closeFlow";
+import { startExternalChangeWatcher } from "../features/documents/externalChanges";
+import { startOpenFilesHandler } from "../features/documents/openFilesHandler";
+import { startReloadUndo } from "../features/editor/reloadUndo";
+import { useSettings } from "../features/settings/store";
+import { restoreSession } from "../features/session/restore";
+import { startRecoveryWriter } from "../features/session/recoveryWriter";
+import { startSessionManager } from "../features/session/sessionManager";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -31,29 +35,50 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
-export default function App() {
-  useEffect(() => startMenuBridge(), []);
-  useEffect(() => startExternalChangeWatcher(), []);
-  useEffect(() => startReloadUndo(), []);
-  useEffect(() => startOpenFilesHandler(), []);
+/** Startup: preferences -> restore previous session -> start the long-lived services. */
+function useAppLifecycle() {
   useEffect(() => {
-    let un: (() => void) | undefined;
-    let stopped = false;
+    let cancelled = false;
+    const stops: (() => void)[] = [startMenuBridge(), startReloadUndo()];
+
+    let unlistenClose: (() => void) | undefined;
     events
       .onCloseRequested(() => void requestExit())
-      .then((u) => (stopped ? u() : (un = u)))
-      .catch(() => undefined);
+      .then((u) => {
+        if (cancelled) u();
+        else unlistenClose = u;
+      })
+      .catch(() => undefined); // not inside Tauri
+    stops.push(() => unlistenClose?.());
+
+    void (async () => {
+      await useSettings.getState().load();
+      await restoreSession();
+      if (cancelled) return;
+      stops.push(
+        startSessionManager(),
+        startRecoveryWriter(),
+        startExternalChangeWatcher(),
+        startOpenFilesHandler(), // after restore so launch files land after the old tabs
+      );
+    })();
+
     return () => {
-      stopped = true;
-      un?.();
+      cancelled = true;
+      stops.forEach((s) => s());
     };
   }, []);
+}
+
+export default function App() {
+  useAppLifecycle();
+  const statusBarVisible = useSettings((s) => s.prefs.statusBarVisible);
   return (
     <ErrorBoundary>
       <div className="app">
         <TabBar onNew={newDocument} onClose={(ids) => void requestClose(ids)} />
         <main className="app-main">{spikeEnabled ? <SpikeEditors /> : <EditorHost />}</main>
-        <StatusBar />
+        {statusBarVisible && <StatusBar />}
         <ToastHost />
         <DialogHost />
       </div>

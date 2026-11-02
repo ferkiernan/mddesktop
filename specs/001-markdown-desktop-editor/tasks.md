@@ -175,20 +175,20 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T073 [P] [US4] Tests Rust de sesión/recuperación/ajustes (válidos, ausentes, corruptos, rangos) en `src-tauri/tests/session_commands.rs`
-- [ ] T074 [P] [US4] Tests del escritor de recuperación (debounce ~4 s, al cambiar de pestaña, sin timers sin cambios) en `tests/unit/recovery.spec.ts`
-- [ ] T075 [P] [US4] Tests de restauración (huella distinta → `externalState`, huérfanos) en `tests/unit/session-restore.spec.ts`
-- [ ] T076 [P] [US4] E2E nativo: terminar proceso y relanzar en `tests/e2e/native/recovery.spec.ts`
+- [x] T073 [P] [US4] Tests Rust de sesión/recuperación/ajustes (válidos, ausentes, corruptos, rangos) en `src-tauri/tests/session_commands.rs`
+- [x] T074 [P] [US4] Tests del escritor de recuperación (debounce ~4 s, al cambiar de pestaña, sin timers sin cambios) en `tests/unit/recovery.spec.ts`
+- [x] T075 [P] [US4] Tests de restauración (huella distinta → `externalState`, huérfanos) en `tests/unit/session-restore.spec.ts`
+- [x] T076 [P] [US4] E2E nativo: terminar proceso y relanzar en `tests/e2e/native/recovery.spec.ts`
 
 ### Implementación
 
-- [ ] T077 [US4] Comandos `session_load/save`, `recovery_write/list/delete`, `settings_load/save` en `src-tauri/src/commands/session.rs` y `src-tauri/src/commands/settings.rs`
-- [ ] T078 [US4] Session Manager (guardar sesión al abrir/cerrar/reordenar/activar con debounce corto) en `src/features/session/sessionManager.ts`
-- [ ] T079 [US4] Escritor de recuperación con debounce ~4 s y al cambiar de pestaña en `src/features/session/recoveryWriter.ts`
-- [ ] T080 [US4] Flujo de arranque: restaurar pestañas, activa y recuperación en `src/features/session/restore.ts`; diálogo de recuperación en `src/ui/RecoveryDialog.tsx`
-- [ ] T081 [P] [US4] Settings Manager y store (tema, zoom, barra de estado, último directorio, pool, umbral) en `src/features/settings/store.ts`
-- [ ] T082 [US4] Persistir tamaño/posición de ventana con `window-state` en `src-tauri/src/lib.rs`
-- [ ] T083 [US4] Limpiar `recovery/*` al guardar, descartar o cerrar sin guardar en `src/features/session/recoveryWriter.ts`
+- [x] T077 [US4] Comandos `session_load/save`, `recovery_write/list/delete`, `settings_load/save` en `src-tauri/src/commands/session.rs` y `src-tauri/src/commands/settings.rs`
+- [x] T078 [US4] Session Manager (guardar sesión al abrir/cerrar/reordenar/activar con debounce corto) en `src/features/session/sessionManager.ts`
+- [x] T079 [US4] Escritor de recuperación con debounce ~4 s y al cambiar de pestaña en `src/features/session/recoveryWriter.ts`
+- [x] T080 [US4] Flujo de arranque: restaurar pestañas, activa y recuperación en `src/features/session/restore.ts`; diálogo de recuperación en `src/ui/RecoveryDialog.tsx`
+- [x] T081 [P] [US4] Settings Manager y store (tema, zoom, barra de estado, último directorio, pool, umbral) en `src/features/settings/store.ts`
+- [x] T082 [US4] Persistir tamaño/posición de ventana con `window-state` en `src-tauri/src/lib.rs`
+- [x] T083 [US4] Limpiar `recovery/*` al guardar, descartar o cerrar sin guardar en `src/features/session/recoveryWriter.ts`
 
 ---
 

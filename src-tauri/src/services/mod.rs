@@ -1,3 +1,4 @@
+pub mod app_data;
 pub mod authz;
 pub mod dialog_service;
 pub mod encoding;
