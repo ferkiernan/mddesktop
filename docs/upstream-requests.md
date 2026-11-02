@@ -17,9 +17,9 @@ Open an issue per item in the `mdwysiwyg` repository and link it here when creat
 
 ## Status (2026-11-02)
 
-U1 (`setMarkdown`), U2 (`insertMarkdown`) and U3 (`resolveImageSrc`) are implemented and tested in
+U1 (`setMarkdown`), U2 (`insertMarkdown`) and U3 (`resolveImageSrc`): PR https://github.com/ferkiernan/mdwysiwyg/pull/2 (open, not merged, not published). Same change as
 [`mdwysiwyg-host-api.patch`](mdwysiwyg-host-api.patch) (against `ferkiernan/mdwysiwyg` master; all 153 tests pass,
-4 new in `tests/MarkdownEditor/host-integration.test.tsx`). Nothing has been pushed or published upstream.
+4 new in `tests/MarkdownEditor/host-integration.test.tsx`). Nothing has been published to npm.
 
 To apply: `git apply docs/mdwysiwyg-host-api.patch` in a checkout of `mdwysiwyg`, update its README/CHANGELOG, bump to
 0.3.0, publish, then set `"mdwysiwyg": "^0.3.0"` here.
