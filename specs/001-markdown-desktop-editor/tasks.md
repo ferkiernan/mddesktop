@@ -45,14 +45,14 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Núcleo Rust
 
-- [ ] T010 `AppError` con códigos de data-model.md y serialización a `{code,message,details}` en `src-tauri/src/error.rs`
-- [ ] T011 [P] `AppState` (rutas autorizadas, watcher, última huella propia por ruta) en `src-tauri/src/state.rs`
-- [ ] T012 [P] `AuthorizedPaths` con canonicalización, rechazo de `..` y extensiones no `.md`/`.markdown`, más tests unitarios en `src-tauri/src/services/authz.rs`
-- [ ] T013 [P] Módulo de codificación: BOM, UTF-8 estricto, detección con `chardetng`, detección/normalización de EOL y reaplicación de EOL/BOM, con tests en `src-tauri/src/services/encoding.rs`
-- [ ] T014 [P] `FileFingerprint` (`mtimeMs`, `size`, hash xxh3) y `stat` en `src-tauri/src/services/fs_service.rs`
-- [ ] T015 Lectura de documento y escritura atómica (temp en el mismo directorio → `sync_all` → `rename`; omitir si bytes idénticos; `EXTERNAL_CONFLICT`, `ENCODING_CONVERSION_REQUIRED`) en `src-tauri/src/services/fs_service.rs`, con tests de integración en `src-tauri/tests/fs_service.rs` incluyendo fallo simulado a mitad de escritura (SC-006)
-- [ ] T016 Persistencia JSON atómica con manejo de archivo corrupto (`*.corrupt-<ts>`) en `src-tauri/src/services/persistence.rs`, con tests en `src-tauri/tests/persistence.rs`
-- [ ] T017 Builder de Tauri: `single-instance` registrado primero, `window-state`, `dialog`, estado y registro de comandos en `src-tauri/src/lib.rs`; CSP estricta y ventana en `src-tauri/tauri.conf.json`; permisos mínimos en `src-tauri/capabilities/default.json`
+- [x] T010 `AppError` con códigos de data-model.md y serialización a `{code,message,details}` en `src-tauri/src/error.rs`
+- [x] T011 [P] `AppState` (rutas autorizadas, watcher, última huella propia por ruta) en `src-tauri/src/state.rs`
+- [x] T012 [P] `AuthorizedPaths` con canonicalización, rechazo de `..` y extensiones no `.md`/`.markdown`, más tests unitarios en `src-tauri/src/services/authz.rs`
+- [x] T013 [P] Módulo de codificación: BOM, UTF-8 estricto, detección con `chardetng`, detección/normalización de EOL y reaplicación de EOL/BOM, con tests en `src-tauri/src/services/encoding.rs`
+- [x] T014 [P] `FileFingerprint` (`mtimeMs`, `size`, hash xxh3) y `stat` en `src-tauri/src/services/fs_service.rs`
+- [x] T015 Lectura de documento y escritura atómica (temp en el mismo directorio → `sync_all` → `rename`; omitir si bytes idénticos; `EXTERNAL_CONFLICT`, `ENCODING_CONVERSION_REQUIRED`) en `src-tauri/src/services/fs_service.rs`, con tests de integración en `src-tauri/tests/fs_service.rs` incluyendo fallo simulado a mitad de escritura (SC-006)
+- [x] T016 Persistencia JSON atómica con manejo de archivo corrupto (`*.corrupt-<ts>`) en `src-tauri/src/services/persistence.rs`, con tests en `src-tauri/tests/persistence.rs`
+- [x] T017 Builder de Tauri: `single-instance` registrado primero, `window-state`, `dialog`, estado y registro de comandos en `src-tauri/src/lib.rs`; CSP estricta y ventana en `src-tauri/tauri.conf.json`; permisos mínimos en `src-tauri/capabilities/default.json`
 
 ### Capa de servicios del frontend
 

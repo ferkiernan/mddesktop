@@ -70,7 +70,7 @@ Hasta que existan, el producto funciona con los fallbacks indicados; U1–U3 se 
 ## R6. Codificación y finales de línea (FR-002b, FR-013)
 
 - **Decisión**: `encoding_rs` + `chardetng` (Mozilla, pequeños, sin runtime). Flujo: BOM → UTF-8 estricto → detección. Se registran `encoding`, `bom` y `eol` (CRLF/LF/mixto-dominante). El frontend recibe contenido con LF y Rust reaplica EOL/BOM originales al escribir. Convertir a UTF-8 requiere confirmación (el comando devuelve `ENCODING_CONVERSION_REQUIRED` hasta que el frontend reenvíe `convertToUtf8: true`).
-- **Si la detección no es fiable** (confianza baja o bytes inválidos): rechazo con mensaje, archivo intacto.
+- **Si la detección no es fiable** (`chardetng` no expone puntuación de confianza: se exige que la codificación adivinada decodifique el archivo completo sin reemplazos; si no, bytes inválidos): rechazo con mensaje, archivo intacto.
 - **A definir en implementación**: lista de codificaciones aceptadas (propuesta: Windows-1252/ISO-8859-1, UTF-16 LE/BE con BOM, y las que `chardetng` devuelva con confianza alta).
 
 ## R7. Menús, atajos y Edit
