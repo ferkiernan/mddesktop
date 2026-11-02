@@ -264,9 +264,9 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ## Phase 10: Polish y transversales
 
-- [ ] T110 [P] Medir y documentar SC-001…SC-003 en equipo de referencia con `scripts/perf/measure.ps1` → `docs/performance.md`
-- [ ] T111 [P] Revisión de seguridad: permisos mínimos de `capabilities/default.json`, CSP, ausencia de `plugin-fs` en el frontend y de ejecución de procesos, en `docs/security-review.md`
-- [ ] T112 [P] Documentar limitaciones de `mdwysiwyg` (normalización, historial por pestaña, pool) en `docs/mdwysiwyg-limitations.md` y `README.md`
+- [x] T110 [P] Medir y documentar SC-001…SC-003 en equipo de referencia con `scripts/perf/measure.ps1` → `docs/performance.md`
+- [x] T111 [P] Revisión de seguridad: permisos mínimos de `capabilities/default.json`, CSP, ausencia de `plugin-fs` en el frontend y de ejecución de procesos, en `docs/security-review.md`
+- [x] T112 [P] Documentar limitaciones de `mdwysiwyg` (normalización, historial por pestaña, pool) en `docs/mdwysiwyg-limitations.md` y `README.md`
 - [ ] T113 [P] Accesibilidad básica de menú, pestañas y diálogos (roles ARIA, foco, teclado) en `src/ui/` y `src/features/tabs/`
 - [ ] T114 Revisar dependencias (justificación y tamaño) y eliminar las no usadas en `package.json` y `src-tauri/Cargo.toml` (Principio I/IX)
 - [ ] T115 Suite E2E completa (UI + nativa) pasando en CI en `.github/workflows/ci.yml`
