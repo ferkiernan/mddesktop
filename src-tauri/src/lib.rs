@@ -1,3 +1,4 @@
+pub mod commands;
 pub mod error;
 pub mod services;
 pub mod state;
@@ -17,7 +18,17 @@ pub fn run() {
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
         .manage(state::AppState::default())
-        .invoke_handler(tauri::generate_handler![])
+        .setup(|app| {
+            services::menu::setup(app)?;
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            commands::documents::pick_open_files,
+            commands::documents::read_document,
+            commands::documents::pick_save_path,
+            commands::documents::write_document,
+            commands::documents::stat_document,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

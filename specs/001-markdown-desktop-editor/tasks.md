@@ -70,7 +70,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [ ] T026 [P] S2: prueba de fidelidad — abrir/serializar el corpus sin editar (bytes idénticos) y tras ediciones típicas, listando transformaciones, en `tests/unit/fidelity.spec.ts` y `docs/spikes.md`
 - [ ] T027 [P] S3: probar en un build real `single-instance` (argumentos desde el Explorador) y `fileAssociations` mínimo en `src-tauri/tauri.conf.json`; documentar cómo llegan los argumentos en Windows
 - [ ] T028 [P] S4: prototipo de menú Edición nativo (Deshacer/Rehacer/Cortar/Copiar/Pegar/Seleccionar todo sin acelerador) sobre el editor; decidir menú nativo vs HTML en `docs/spikes.md`
-- [ ] T029 [P] S5: ejecutar Playwright contra el WebView2 real vía CDP (`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) con una prueba mínima en `tests/e2e/native/smoke.spec.ts`; alternativa `tauri-driver`
+- [x] T029 [P] S5: ejecutar Playwright contra el WebView2 real vía CDP (`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) con una prueba mínima en `tests/e2e/native/smoke.spec.ts`; alternativa `tauri-driver`
 - [ ] T030 [P] S6: probar reordenado por Pointer Events y comprobar si el DnD HTML5 interno funciona con el arrastre de archivos activo, en `tests/e2e/ui/dnd-spike.spec.ts`
 - [x] T031 Puerta de calidad: consolidar S1–S6 en `docs/spikes.md` con decisión explícita (pool, menú, E2E, DnD); si S1 incumple el presupuesto de RAM, detener y decidir antes de continuar — resuelta: S1 medido (ver docs/spikes.md); S2–S6 pasan a sus historias
 - [ ] T032 [P] Registrar en `docs/upstream-requests.md` y abrir issues en `ferkiernan/mdwysiwyg` para U1 (`setMarkdown` deshacible), U2 (`insertMarkdown`), U3 (`resolveImageSrc`) y U4 (estado de vista) con los contratos de editor-adapter.md
@@ -87,24 +87,24 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T033 [P] [US1] Tests de comandos de documentos (CRLF→LF, `TOO_LARGE`, `ENCODING_UNDETECTABLE`, conflicto, conversión de codificación, no-op) en `src-tauri/tests/documents_commands.rs`
-- [ ] T034 [P] [US1] Tests del store (nuevo, abrir con deduplicación por ruta, `isDirty` derivado, guardar actualiza `savedContent`, Guardar como sobre ruta abierta) en `tests/unit/documents-store.spec.ts`
+- [x] T033 [P] [US1] Tests de comandos de documentos (CRLF→LF, `TOO_LARGE`, `ENCODING_UNDETECTABLE`, conflicto, conversión de codificación, no-op) en `src-tauri/tests/documents_commands.rs`
+- [x] T034 [P] [US1] Tests del store (nuevo, abrir con deduplicación por ruta, `isDirty` derivado, guardar actualiza `savedContent`, Guardar como sobre ruta abierta) en `tests/unit/documents-store.spec.ts`
 - [ ] T035 [P] [US1] Test de contrato del adaptador (montaje, `onChange`, alternar vistas sin disparar cambios) en `tests/components/editor-adapter.spec.tsx`
 - [ ] T036 [P] [US1] E2E de UI abrir → editar → guardar y Guardar como de documento nuevo en `tests/e2e/ui/open-edit-save.spec.ts`
 
 ### Implementación
 
-- [ ] T037 [US1] Servicio de diálogos nativos (abrir multi-archivo, guardar como; autorizan rutas; arrancan en `lastDirectory`) en `src-tauri/src/services/dialog_service.rs`
-- [ ] T038 [US1] Comandos `pick_open_files`, `read_document`, `pick_save_path`, `write_document`, `stat_document` según ipc-commands.md en `src-tauri/src/commands/documents.rs`
-- [ ] T039 [US1] Menú nativo Archivo (Nuevo, Abrir, Guardar, Guardar como, Cerrar documento, Cerrar todos, Salir) con aceleradores de aplicación y evento `menu://action` en `src-tauri/src/services/menu.rs`
-- [ ] T040 [P] [US1] Tipos `EditorDocument`, `FileFingerprint` y derivados en `src/features/documents/types.ts`
-- [ ] T041 [US1] Store Zustand de documentos (id, ruta única, contenido, `savedContent`, huella, EOL/BOM/codificación) en `src/features/documents/store.ts`
-- [ ] T042 [US1] Acciones nuevo/abrir/guardar/guardar como (guardar sin ruta → Guardar como; confirmar conversión de codificación; manejo de `TOO_LARGE` y errores) en `src/features/documents/actions.ts`
-- [ ] T043 [P] [US1] `EditorAdapter` (instancia única, normaliza a `\n`, detecta capacidades U1/U2) y cargador perezoso en `src/features/editor/EditorAdapter.tsx` y `src/features/editor/lazy.ts`
-- [ ] T044 [US1] `EditorHost` que conecta documento activo ↔ adaptador ↔ store en `src/features/editor/EditorHost.tsx`
-- [ ] T045 [P] [US1] Barra de estado (nombre, ruta, estado de cambios) y toast de confirmación de guardado en `src/ui/StatusBar.tsx` y `src/ui/Toast.tsx`
-- [ ] T046 [P] [US1] Diálogos de aviso de archivo grande, error de codificación y error de guardado en `src/ui/Dialogs.tsx`
-- [ ] T047 [US1] Puente `menu://action` → acciones de documentos en `src/app/menuBridge.ts`
+- [x] T037 [US1] Servicio de diálogos nativos (abrir multi-archivo, guardar como; autorizan rutas; arrancan en `lastDirectory`) en `src-tauri/src/services/dialog_service.rs`
+- [x] T038 [US1] Comandos `pick_open_files`, `read_document`, `pick_save_path`, `write_document`, `stat_document` según ipc-commands.md en `src-tauri/src/commands/documents.rs`
+- [x] T039 [US1] Menú nativo Archivo (Nuevo, Abrir, Guardar, Guardar como, Cerrar documento, Cerrar todos, Salir) con aceleradores de aplicación y evento `menu://action` en `src-tauri/src/services/menu.rs`
+- [x] T040 [P] [US1] Tipos `EditorDocument`, `FileFingerprint` y derivados en `src/features/documents/types.ts`
+- [x] T041 [US1] Store Zustand de documentos (id, ruta única, contenido, `savedContent`, huella, EOL/BOM/codificación) en `src/features/documents/store.ts`
+- [x] T042 [US1] Acciones nuevo/abrir/guardar/guardar como (guardar sin ruta → Guardar como; confirmar conversión de codificación; manejo de `TOO_LARGE` y errores) en `src/features/documents/actions.ts`
+- [x] T043 [P] [US1] `EditorAdapter` (instancia única, normaliza a `\n`, detecta capacidades U1/U2) y cargador perezoso en `src/features/editor/EditorAdapter.tsx` y `src/features/editor/lazy.ts`
+- [x] T044 [US1] `EditorHost` que conecta documento activo ↔ adaptador ↔ store en `src/features/editor/EditorHost.tsx`
+- [x] T045 [P] [US1] Barra de estado (nombre, ruta, estado de cambios) y toast de confirmación de guardado en `src/ui/StatusBar.tsx` y `src/ui/Toast.tsx`
+- [x] T046 [P] [US1] Diálogos de aviso de archivo grande, error de codificación y error de guardado en `src/ui/Dialogs.tsx`
+- [x] T047 [US1] Puente `menu://action` → acciones de documentos en `src/app/menuBridge.ts`
 
 **Checkpoint**: US1 funcional y probada de forma independiente (MVP).
 

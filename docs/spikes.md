@@ -31,3 +31,11 @@ Se resuelven dentro de la fase de cada historia para no bloquear el núcleo, con
 | S4 menú Edición nativo | US6 | Menú nativo sin aceleradores para Ctrl+Z/Y/X/C/V/A; si falla, menú HTML |
 | S5 E2E sobre WebView2 | Fase 10 / primera prueba nativa (US4) | Capa `ui` con IPC simulado |
 | S6 DnD de pestañas | US2 | Pointer Events propios |
+
+## S5 — Automatización del WebView2 real (2026-11-01) ✔
+
+Lanzar el exe con `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9333` expone CDP en `http://127.0.0.1:9333`.
+Un script Node (WebSocket nativo) recargó la página, recogió consola/log y sondeó el DOM: `mdwysiwyg` monta (`.ProseMirror` presente)
+bajo la CSP estricta de `tauri.conf.json` **sin violaciones de CSP**. Playwright `connectOverCDP` usa el mismo mecanismo → capa E2E nativa viable.
+
+Hallazgo upstream: Tiptap avisa `Duplicate extension names found: ['link']` (la librería registra `link` dos veces); anotar en `docs/upstream-requests.md`.
