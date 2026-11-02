@@ -92,7 +92,7 @@ Se elimina al guardar, descartar o cerrar sin guardar. Al restaurar, si `baseFin
 | `statusBarVisible` | boolean | true |
 | `lastDirectory` | string \| null | |
 | `editorPoolSize` | number | 3; rango 1–8 |
-| `largeFileWarnBytes` | number | 5 242 880 (a confirmar con S1; FR-002a) |
+| `largeFileWarnBytes` | number | 262 144 (256 KB; medido, ver docs/performance.md; FR-002a) |
 
 Tamaño y posición de ventana los guarda `window-state`.
 

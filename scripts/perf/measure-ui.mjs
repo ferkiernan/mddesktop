@@ -55,9 +55,19 @@ for (let i = 0; i < 12; i++) {
   switches.push(Math.round(ms));
   await sleep(150);
 }
+// open in a running app: forward a new file through a second instance and time until it renders
+const extra = join(dir, "doc4.md");
+writeFileSync(extra, "# Documento 4\n\n" + body);
+const t1 = performance.now();
+spawn(exe, [extra], { env: process.env, stdio: "ignore" });
+let openRunningMs = null;
+while (performance.now() - t1 < 10000) {
+  if (await evalJs(`!!document.querySelector(".editor-slot:not([hidden]) .ProseMirror")?.textContent.includes("Documento 4")`)) { openRunningMs = Math.round(performance.now() - t1); break; }
+  await sleep(5);
+}
 const valid = switches.filter((x) => x >= 0).sort((a, b) => a - b);
 const median = valid[Math.floor(valid.length / 2)];
-console.log(JSON.stringify({ docSizeKB: sizeKB, openFromProcessStartMs: openMs, tabSwitchMs: switches, tabSwitchMedianMs: median, tabSwitchMaxMs: valid.at(-1) }));
+console.log(JSON.stringify({ docSizeKB: sizeKB, openFromProcessStartMs: openMs, tabSwitchMs: switches, tabSwitchMedianMs: median, tabSwitchMaxMs: valid.at(-1), openInRunningAppMs: openRunningMs }));
 ws.close();
 try { execSync(`taskkill /F /T /IM ${exeName}`, { stdio: "ignore" }); } catch {}
 process.exit(0);

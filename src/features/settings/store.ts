@@ -9,7 +9,7 @@ export const DEFAULT_PREFS: Preferences = {
   statusBarVisible: true,
   lastDirectory: null,
   editorPoolSize: 3,
-  largeFileWarnBytes: 5 * 1024 * 1024,
+  largeFileWarnBytes: 256 * 1024,
 };
 
 interface SettingsState {

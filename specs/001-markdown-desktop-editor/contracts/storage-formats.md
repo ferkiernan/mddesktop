@@ -15,7 +15,7 @@ Ubicación: directorio de datos de la aplicación del usuario (resuelto por Taur
 
 ```json
 { "version": 1, "theme": "dark", "uiZoom": 1.0, "statusBarVisible": true,
-  "lastDirectory": "C:\\Users\\...\\docs", "editorPoolSize": 3, "largeFileWarnBytes": 5242880 }
+  "lastDirectory": "C:\\Users\\...\\docs", "editorPoolSize": 3, "largeFileWarnBytes": 262144 }
 ```
 
 ## session.json

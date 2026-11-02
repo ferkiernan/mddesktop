@@ -6,9 +6,6 @@ use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{AppHandle, Emitter, Manager, State};
 
-/// Default large-file threshold (FR-002a); becomes a preference in the settings story.
-const LARGE_FILE_WARN_BYTES: u64 = 5 * 1024 * 1024;
-
 #[tauri::command]
 pub async fn pick_open_files(app: AppHandle, state: State<'_, AppState>) -> AppResult<Vec<PathBuf>> {
     dialog_service::pick_open_files(&app, &state)
@@ -22,7 +19,9 @@ pub async fn read_document(
     accept_large: bool,
 ) -> AppResult<ReadResult> {
     let path = state.authorized.check(&path)?;
-    let r = fs_service::read_document(&path, accept_large, LARGE_FILE_WARN_BYTES)?;
+    // FR-002a: threshold comes from the preferences (default 256 KB, see docs/performance.md)
+    let warn = super::session::data(&app)?.load_settings()?.large_file_warn_bytes;
+    let r = fs_service::read_document(&path, accept_large, warn)?;
     state.known.set(&path, r.fingerprint.clone());
     allow_assets(&app, &path);
     Ok(r)

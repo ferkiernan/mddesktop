@@ -13,7 +13,7 @@
 ### Session 2026-11-01
 
 - Q: Si un archivo cambia en disco mientras está abierto con cambios locales, ¿qué opciones se ofrecen? → A: Tres opciones: (1) Pisar el archivo en disco con la versión local; (2) Cargar la versión actualizada del disco en otra pestaña como documento nuevo sin ruta; (3) Recargar el contenido del disco en la pestaña actual. En el área de edición, Ctrl+Z siempre debe permitir restaurar el contenido anterior a la recarga.
-- Q: ¿Qué debe pasar al abrir un archivo muy grande? → A: Avisar al superar un umbral (valor inicial 5 MB, a confirmar con mediciones en el plan) y dejar al usuario elegir entre abrirlo igualmente o cancelar.
+- Q: ¿Qué debe pasar al abrir un archivo muy grande? → A: Avisar al superar un umbral (valor 256 KB, fijado con mediciones: ver docs/performance.md) y dejar al usuario elegir entre abrirlo igualmente o cancelar.
 - Q: ¿Qué hace la app si un archivo `.md` no es UTF-8 válido? → A: Detectar la codificación y abrirlo; al guardar, convertirlo a UTF-8 solo con confirmación explícita del usuario (lista de codificaciones soportadas a definir en el plan).
 - Q: ¿Cuándo se guarda el contenido de recuperación de documentos sin guardar? → A: Unos segundos después del último cambio (~3–5 s, sin temporizador activo si no hay cambios) y al cambiar de pestaña, en un almacén aparte sin tocar el archivo original.
 - Q: ¿Qué hace la app si se inserta una imagen local en un documento sin ruta? → A: Pedir guardar primero el documento (Guardar como) y, una vez guardado, continuar con la inserción usando ruta relativa.
@@ -159,7 +159,7 @@ El usuario inserta imágenes locales en un documento; la aplicación le ofrece c
 
 - **FR-001**: El sistema MUST permitir crear documentos nuevos vacíos, identificados con un identificador único y sin ruta hasta ser guardados.
 - **FR-002**: El sistema MUST permitir abrir archivos `.md` y `.markdown` mediante un diálogo nativo de selección, leyéndolos como UTF-8 por defecto (otras codificaciones: ver FR-002b).
-- **FR-002a**: Antes de abrir un archivo cuyo tamaño supere un umbral de aviso (valor inicial 5 MB, a validar con mediciones), el sistema MUST advertir al usuario y permitirle elegir entre abrirlo igualmente o cancelar, sin bloquear la interfaz.
+- **FR-002a**: Antes de abrir un archivo cuyo tamaño supere un umbral de aviso (256 KB por defecto, configurable; fijado con mediciones), el sistema MUST advertir al usuario y permitirle elegir entre abrirlo igualmente o cancelar, sin bloquear la interfaz.
 - **FR-002b**: El sistema MUST detectar la codificación de los archivos abiertos; si no es UTF-8, MUST mostrarlos igualmente y, antes de guardar, MUST pedir confirmación explícita para convertirlos a UTF-8 (el usuario puede cancelar el guardado). Si la codificación no puede determinarse con fiabilidad, MUST rechazar la apertura con un mensaje claro sin modificar el archivo.
 - **FR-003**: El sistema MUST impedir documentos duplicados: abrir un archivo ya abierto activa su pestaña existente.
 - **FR-004**: El sistema MUST mostrar cada documento en una pestaña independiente con nombre, indicador de cambios sin guardar, acción de cierre e indicador de pestaña activa.

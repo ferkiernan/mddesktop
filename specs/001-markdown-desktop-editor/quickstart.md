@@ -47,7 +47,7 @@ npm run test:e2e:native # Playwright sobre el binario real (tras S5)
 | V8 | US5 | Doble clic en un `.md` con la app cerrada y luego abierta | Abre en una sola instancia; el segundo archivo aparece como pestaña en la misma ventana |
 | V9 | US5 | Arrastrar `.md` y un `.txt` sobre la ventana | El `.md` se abre; el `.txt` se rechaza con mensaje |
 | V10 | US6 | Probar cada atajo de la tabla del spec; alternar tema y reiniciar | Acciones correctas sin conflicto con el editor; el tema persiste |
-| V11 | Bordes | Abrir archivo > 5 MB | Aviso con opción de abrir o cancelar; UI sin bloqueo |
+| V11 | Bordes | Abrir archivo > 256 KB | Aviso con opción de abrir o cancelar; UI sin bloqueo |
 | V12 | Bordes | Abrir un `.md` en Windows-1252 y guardar | Pide confirmación para convertir a UTF-8 |
 | V13 | Integridad | Guardar un `.md` CRLF sin tocar el contenido | Bytes idénticos (EOL y BOM preservados); sin escritura si no hay cambios |
 | V14 | US7 (cuando exista U2/U3) | Insertar imagen en documento guardado, aceptar copia a `assets/` | Ruta relativa en el Markdown; la imagen se ve; mover la carpeta no la rompe |

@@ -3,7 +3,7 @@ use crate::services::app_data::{AppData, Preferences, RecoveryEntry, Session};
 use crate::state::AppState;
 use tauri::{AppHandle, Manager, State};
 
-fn data(app: &AppHandle) -> AppResult<AppData> {
+pub(crate) fn data(app: &AppHandle) -> AppResult<AppData> {
     app.path()
         .app_data_dir()
         .map(AppData::new)

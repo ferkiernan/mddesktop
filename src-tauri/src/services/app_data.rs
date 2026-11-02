@@ -27,7 +27,7 @@ impl Default for Preferences {
             status_bar_visible: true,
             last_directory: None,
             editor_pool_size: 3,
-            large_file_warn_bytes: 5 * 1024 * 1024,
+            large_file_warn_bytes: 256 * 1024,
         }
     }
 }
