@@ -90,7 +90,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T033 [P] [US1] Tests de comandos de documentos (CRLF→LF, `TOO_LARGE`, `ENCODING_UNDETECTABLE`, conflicto, conversión de codificación, no-op) en `src-tauri/tests/documents_commands.rs`
 - [x] T034 [P] [US1] Tests del store (nuevo, abrir con deduplicación por ruta, `isDirty` derivado, guardar actualiza `savedContent`, Guardar como sobre ruta abierta) en `tests/unit/documents-store.spec.ts`
 - [ ] T035 [P] [US1] Test de contrato del adaptador (montaje, `onChange`, alternar vistas sin disparar cambios) en `tests/components/editor-adapter.spec.tsx`
-- [ ] T036 [P] [US1] E2E de UI abrir → editar → guardar y Guardar como de documento nuevo en `tests/e2e/ui/open-edit-save.spec.ts`
+- [x] T036 [P] [US1] E2E de UI abrir → editar → guardar y Guardar como de documento nuevo en `tests/e2e/ui/open-edit-save.spec.ts`
 
 ### Implementación
 
@@ -121,7 +121,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T048 [P] [US2] Tests del reordenado y de cerrar otras/todas (lógica pura) en `tests/unit/tabs-store.spec.ts`
 - [x] T049 [P] [US2] Tests del pool LRU (montar, ocultar, expulsar, remontar con contenido actual) en `tests/unit/editor-pool.spec.ts`
 - [x] T050 [P] [US2] Tests RTL de la barra de pestañas (nombre, indicador de cambios, cierre, activa, nueva) en `tests/components/tabbar.spec.tsx`
-- [ ] T051 [P] [US2] E2E de UI: abrir 3, alternar, reordenar, cerrar otras en `tests/e2e/ui/tabs.spec.ts`
+- [x] T051 [P] [US2] E2E de UI: abrir 3, alternar, reordenar, cerrar otras en `tests/e2e/ui/tabs.spec.ts`
 
 ### Implementación
 
@@ -148,7 +148,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T059 [P] [US3] Test Rust del watcher (modificado, eliminado, renombrado, debounce, ignorar escritura propia) en `src-tauri/tests/watcher.rs`
 - [x] T060 [P] [US3] Tests del flujo de cierre (pestaña, todas, salir; Cancelar aborta) en `tests/unit/close-flow.spec.ts`
 - [x] T061 [P] [US3] Tests de resolución de conflicto (pisar, abrir en pestaña nueva sin ruta, recargar aquí; Ctrl+Z restaura) en `tests/unit/conflict.spec.ts`
-- [ ] T062 [P] [US3] E2E de UI de cierre con pendientes y de conflicto en `tests/e2e/ui/data-protection.spec.ts`
+- [x] T062 [P] [US3] E2E de UI de cierre con pendientes y de conflicto en `tests/e2e/ui/data-protection.spec.ts`
 
 ### Implementación
 
@@ -269,7 +269,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T112 [P] Documentar limitaciones de `mdwysiwyg` (normalización, historial por pestaña, pool) en `docs/mdwysiwyg-limitations.md` y `README.md`
 - [x] T113 [P] Accesibilidad básica de menú, pestañas y diálogos (roles ARIA, foco, teclado) en `src/ui/` y `src/features/tabs/`
 - [x] T114 Revisar dependencias (justificación y tamaño) y eliminar las no usadas en `package.json` y `src-tauri/Cargo.toml` (Principio I/IX)
-- [ ] T115 Suite E2E completa (UI + nativa) pasando en CI en `.github/workflows/ci.yml`
+- [x] T115 Suite E2E completa (UI + nativa) pasando en CI en `.github/workflows/ci.yml`
 - [ ] T116 `npm run tauri build`: generar instalador NSIS y validar V1–V15 de quickstart.md en una máquina sin Node/Rust (SC-009, SC-010)
 - [ ] T117 Actualizar `specs/001-markdown-desktop-editor/spec.md` y `plan.md` con los resultados de spikes y mediciones; cerrar ítems pendientes de Assumptions (umbral de tamaño, codificaciones soportadas)
 

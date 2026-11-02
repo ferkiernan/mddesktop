@@ -4,6 +4,7 @@ import { toAppError } from "../../services/errors";
 import { ask } from "../../ui/dialogs";
 import { toast } from "../../ui/Toast";
 import { useDocuments } from "./store";
+import { pathKey } from "./types";
 import { resolveExternalChange } from "./conflictActions";
 
 const fmtMB = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
@@ -26,13 +27,23 @@ export async function openFiles(paths?: string[]): Promise<void> {
     await showError("No se pudo abrir", e);
     return;
   }
-  for (const path of list) {
-    const store = useDocuments.getState();
-    const existing = store.findByPath(path);
-    if (existing) {
-      store.setActive(existing.id);
-      continue;
-    }
+  for (const path of list) await openOne(path);
+}
+
+/** Paths being read right now: a second request for the same file (e.g. argv + drop) waits for it. */
+const inflight = new Map<string, Promise<void>>();
+
+async function openOne(path: string): Promise<void> {
+  const key = pathKey(path);
+  const running = inflight.get(key);
+  if (running) await running;
+  const store = useDocuments.getState();
+  const existing = store.findByPath(path);
+  if (existing) {
+    store.setActive(existing.id);
+    return;
+  }
+  const task = (async () => {
     try {
       let result;
       try {
@@ -49,13 +60,19 @@ export async function openFiles(paths?: string[]): Promise<void> {
             { label: "Abrir", value: "open", primary: true },
           ],
         });
-        if (choice !== "open") continue;
+        if (choice !== "open") return;
         result = await documents.read(path, true);
       }
       useDocuments.getState().addOpened(result);
     } catch (e) {
       await showError("No se pudo abrir el archivo", e);
     }
+  })();
+  inflight.set(key, task);
+  try {
+    await task;
+  } finally {
+    inflight.delete(key);
   }
 }
 
