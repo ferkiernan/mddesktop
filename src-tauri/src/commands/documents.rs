@@ -1,10 +1,10 @@
-use crate::error::AppResult;
-use crate::services::fs_service::{self, FileFingerprint, ReadResult, WriteRequest};
+use crate::error::{AppError, AppResult, ErrorCode};
 use crate::services::dialog_service;
+use crate::services::fs_service::{self, FileFingerprint, ReadResult, WriteRequest};
 use crate::state::AppState;
 use serde::Serialize;
 use std::path::PathBuf;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 
 /// Default large-file threshold (FR-002a); becomes a preference in the settings story.
 const LARGE_FILE_WARN_BYTES: u64 = 5 * 1024 * 1024;
@@ -21,7 +21,9 @@ pub async fn read_document(
     accept_large: bool,
 ) -> AppResult<ReadResult> {
     let path = state.authorized.check(&path)?;
-    fs_service::read_document(&path, accept_large, LARGE_FILE_WARN_BYTES)
+    let r = fs_service::read_document(&path, accept_large, LARGE_FILE_WARN_BYTES)?;
+    state.known.set(&path, r.fingerprint.clone());
+    Ok(r)
 }
 
 #[tauri::command]
@@ -45,7 +47,9 @@ pub async fn write_document(
     mut request: WriteRequest,
 ) -> AppResult<WriteResult> {
     request.path = state.authorized.check(&request.path)?;
-    Ok(WriteResult { fingerprint: fs_service::write_document(&request)? })
+    let fingerprint = fs_service::write_document(&request)?;
+    state.known.set(&request.path, fingerprint.clone());
+    Ok(WriteResult { fingerprint })
 }
 
 #[derive(Serialize)]
@@ -63,4 +67,23 @@ pub async fn stat_document(state: State<'_, AppState>, path: PathBuf) -> AppResu
     let bytes = std::fs::read(&path)?;
     let fingerprint = fs_service::fingerprint_of_bytes(&path, &bytes)?;
     Ok(StatResult { exists: true, fingerprint: Some(fingerprint) })
+}
+
+/// Replaces the set of watched documents; changes arrive as `fs://external-change`.
+#[tauri::command]
+pub async fn watch_documents(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    paths: Vec<PathBuf>,
+) -> AppResult<()> {
+    let mut checked = Vec::new();
+    for p in &paths {
+        checked.push(state.authorized.check(p)?);
+    }
+    state
+        .watcher
+        .set_paths(&checked, state.known.clone(), move |change| {
+            let _ = app.emit("fs://external-change", change);
+        })
+        .map_err(|e| AppError::new(ErrorCode::Io, e.to_string()))
 }

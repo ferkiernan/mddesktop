@@ -15,6 +15,8 @@ export interface EditorDocument {
   externalState: "none" | "modified" | "removed";
   /** Bumped to force the editor to remount with the current content (e.g. after a reload). */
   revision: number;
+  /** Content before a reload; lets Ctrl+Z restore it when the editor cannot (FR-014a fallback). */
+  reloadSnapshot: string | null;
 }
 
 export function fileNameOf(path: string): string {

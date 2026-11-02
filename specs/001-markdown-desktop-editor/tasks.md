@@ -145,23 +145,23 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Tests
 
-- [ ] T059 [P] [US3] Test Rust del watcher (modificado, eliminado, renombrado, debounce, ignorar escritura propia) en `src-tauri/tests/watcher.rs`
+- [x] T059 [P] [US3] Test Rust del watcher (modificado, eliminado, renombrado, debounce, ignorar escritura propia) en `src-tauri/tests/watcher.rs`
 - [x] T060 [P] [US3] Tests del flujo de cierre (pestaña, todas, salir; Cancelar aborta) en `tests/unit/close-flow.spec.ts`
-- [ ] T061 [P] [US3] Tests de resolución de conflicto (pisar, abrir en pestaña nueva sin ruta, recargar aquí; Ctrl+Z restaura) en `tests/unit/conflict.spec.ts`
+- [x] T061 [P] [US3] Tests de resolución de conflicto (pisar, abrir en pestaña nueva sin ruta, recargar aquí; Ctrl+Z restaura) en `tests/unit/conflict.spec.ts`
 - [ ] T062 [P] [US3] E2E de UI de cierre con pendientes y de conflicto en `tests/e2e/ui/data-protection.spec.ts`
 
 ### Implementación
 
-- [ ] T063 [US3] Observador de archivos con `notify` + debounce (~300 ms), solo archivos abiertos, en `src-tauri/src/services/watcher.rs`
-- [ ] T064 [US3] Comando `watch_documents` y emisión de `fs://external-change` (ignora huella de escritura propia) en `src-tauri/src/commands/documents.rs`
+- [x] T063 [US3] Observador de archivos con `notify` + debounce (~300 ms), solo archivos abiertos, en `src-tauri/src/services/watcher.rs`
+- [x] T064 [US3] Comando `watch_documents` y emisión de `fs://external-change` (ignora huella de escritura propia) en `src-tauri/src/commands/documents.rs`
 - [x] T065 [US3] Ciclo de vida: interceptar cierre de ventana, emitir `app://close-requested`, comando `confirm_exit` en `src-tauri/src/services/lifecycle.rs` y `src-tauri/src/commands/app.rs`
 - [x] T066 [US3] Flujo de cierre con pendientes (pestaña, otras, todas, salir) en `src/features/documents/closeFlow.ts`
 - [x] T067 [P] [US3] `ConfirmCloseDialog` (Guardar/Descartar/Cancelar) en `src/ui/ConfirmCloseDialog.tsx`
-- [ ] T068 [US3] Manejo de `externalState` en el store y re-chequeo de huella al recuperar el foco y antes de guardar en `src/features/documents/externalChanges.ts`
-- [ ] T069 [P] [US3] `ConflictDialog` con las 3 opciones en `src/ui/ConflictDialog.tsx`
-- [ ] T070 [US3] Acciones de conflicto: pisar (`overwriteExternal`), abrir versión del disco en pestaña nueva sin ruta, recargar en la pestaña actual en `src/features/documents/conflictActions.ts`
-- [ ] T071 [US3] Recarga deshacible: usar `setMarkdown` (U1) si el handle lo expone; si no, `reloadSnapshot` + captura de Ctrl+Z solo mientras esté activo, en `src/features/editor/EditorAdapter.tsx` y `src/features/editor/reloadUndo.ts`
-- [ ] T072 [US3] Archivo eliminado/renombrado externamente: aviso y Guardar/Guardar como que recrea el archivo en `src/features/documents/externalChanges.ts`
+- [x] T068 [US3] Manejo de `externalState` en el store y re-chequeo de huella al recuperar el foco y antes de guardar en `src/features/documents/externalChanges.ts`
+- [x] T069 [P] [US3] `ConflictDialog` con las 3 opciones en `src/ui/ConflictDialog.tsx`
+- [x] T070 [US3] Acciones de conflicto: pisar (`overwriteExternal`), abrir versión del disco en pestaña nueva sin ruta, recargar en la pestaña actual en `src/features/documents/conflictActions.ts`
+- [x] T071 [US3] Recarga deshacible: usar `setMarkdown` (U1) si el handle lo expone; si no, `reloadSnapshot` + captura de Ctrl+Z solo mientras esté activo, en `src/features/editor/EditorAdapter.tsx` y `src/features/editor/reloadUndo.ts`
+- [x] T072 [US3] Archivo eliminado/renombrado externamente: aviso y Guardar/Guardar como que recrea el archivo en `src/features/documents/externalChanges.ts`
 
 **Checkpoint**: las tres historias P1 completas (producto utilizable).
 

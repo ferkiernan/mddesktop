@@ -4,6 +4,7 @@ import { toAppError } from "../../services/errors";
 import { ask } from "../../ui/dialogs";
 import { toast } from "../../ui/Toast";
 import { useDocuments } from "./store";
+import { resolveExternalChange } from "./conflictActions";
 
 const fmtMB = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
 
@@ -64,6 +65,13 @@ export async function save(id: string): Promise<boolean> {
   if (!doc) return false;
   if (!doc.filePath) return saveAs(id);
   return writeTo(id, doc.filePath, { expected: doc.fingerprint, overwriteExternal: false });
+}
+
+/** Option 1 of the conflict dialog: overwrite whatever is on disk with the local version. */
+export async function forceSave(id: string): Promise<boolean> {
+  const doc = useDocuments.getState().docs[id];
+  if (!doc?.filePath) return false;
+  return writeTo(id, doc.filePath, { expected: null, overwriteExternal: true });
 }
 
 export async function saveAs(id: string): Promise<boolean> {
@@ -130,6 +138,10 @@ async function writeTo(
         ],
       });
       return choice === "convert" ? writeTo(id, path, opts, true) : false;
+    }
+    if (err.is("EXTERNAL_CONFLICT") && !opts.overwriteExternal) {
+      // the file changed on disk since we read it: let the user decide (FR-014)
+      return resolveExternalChange(id);
     }
     await showError("No se pudo guardar", err);
     return false;

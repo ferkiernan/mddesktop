@@ -35,6 +35,7 @@ pub fn run() {
             commands::documents::pick_save_path,
             commands::documents::write_document,
             commands::documents::stat_document,
+            commands::documents::watch_documents,
             commands::app::confirm_exit,
         ])
         .run(tauri::generate_context!())

@@ -17,6 +17,13 @@ interface DocumentsState {
   close(id: string): void;
   /** Moves a tab to `toIndex` in the order (drag and drop reorder). */
   move(id: string, toIndex: number): void;
+  /** Adds an unsaved document (no path) with the given content, e.g. the on-disk version after a conflict. */
+  addUntitled(name: string, content: string): string;
+  setExternalState(id: string, state: EditorDocument["externalState"]): void;
+  /** Replaces the content with the disk version, remounting the editor and keeping an undo snapshot. */
+  reloadFromDisk(id: string, r: ReadResult): void;
+  /** Ctrl+Z fallback: puts back the pre-reload content. Returns false when there is nothing to restore. */
+  restoreSnapshot(id: string): boolean;
 }
 
 const dirty = (content: string, saved: string) => content !== saved;
@@ -43,6 +50,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
       eol: "crlf",
       externalState: "none",
       revision: 0,
+      reloadSnapshot: null,
     };
     set((s) => ({
       docs: { ...s.docs, [id]: doc },
@@ -74,6 +82,7 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
       eol: r.eol,
       externalState: "none",
       revision: 0,
+      reloadSnapshot: null,
     };
     set((s) => ({ docs: { ...s.docs, [id]: doc }, order: [...s.order, id], activeId: id }));
     return id;
@@ -88,7 +97,8 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
     set((s) => {
       const d = s.docs[id];
       if (!d || d.content === content) return s;
-      return { docs: { ...s.docs, [id]: { ...d, content, isDirty: dirty(content, d.savedContent) } } };
+      const next = { ...d, content, isDirty: dirty(content, d.savedContent), reloadSnapshot: null };
+      return { docs: { ...s.docs, [id]: next } };
     });
   },
 
@@ -111,6 +121,53 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
       };
       return { docs: { ...s.docs, [id]: next } };
     });
+  },
+
+  addUntitled(name, content) {
+    const id = get().newDocument();
+    set((s) => ({
+      docs: { ...s.docs, [id]: { ...s.docs[id], fileName: name, content, isDirty: content !== "" } },
+    }));
+    return id;
+  },
+
+  setExternalState(id, state) {
+    set((s) => (s.docs[id] ? { docs: { ...s.docs, [id]: { ...s.docs[id], externalState: state } } } : s));
+  },
+
+  reloadFromDisk(id, r) {
+    set((s) => {
+      const d = s.docs[id];
+      if (!d) return s;
+      const next: EditorDocument = {
+        ...d,
+        content: r.content,
+        savedContent: r.content,
+        isDirty: false,
+        fingerprint: r.fingerprint,
+        lastModified: r.fingerprint.mtimeMs,
+        encoding: r.encoding,
+        bom: r.bom,
+        eol: r.eol,
+        externalState: "none",
+        revision: d.revision + 1,
+        reloadSnapshot: d.content,
+      };
+      return { docs: { ...s.docs, [id]: next } };
+    });
+  },
+
+  restoreSnapshot(id) {
+    const d = get().docs[id];
+    if (!d || d.reloadSnapshot === null) return false;
+    const content = d.reloadSnapshot;
+    set((s) => ({
+      docs: {
+        ...s.docs,
+        [id]: { ...d, content, isDirty: content !== d.savedContent, revision: d.revision + 1, reloadSnapshot: null },
+      },
+    }));
+    return true;
   },
 
   setActive(id) {

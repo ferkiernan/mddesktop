@@ -7,6 +7,8 @@ import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
 import { startMenuBridge } from "./menuBridge";
 import { events } from "../services/events";
+import { startExternalChangeWatcher } from "../features/documents/externalChanges";
+import { startReloadUndo } from "../features/editor/reloadUndo";
 import { TabBar } from "../features/tabs/TabBar";
 import { newDocument } from "../features/documents/actions";
 import { requestClose, requestExit } from "../features/documents/closeFlow";
@@ -30,6 +32,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 
 export default function App() {
   useEffect(() => startMenuBridge(), []);
+  useEffect(() => startExternalChangeWatcher(), []);
+  useEffect(() => startReloadUndo(), []);
   useEffect(() => {
     let un: (() => void) | undefined;
     let stopped = false;

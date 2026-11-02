@@ -4,3 +4,4 @@ pub mod encoding;
 pub mod fs_service;
 pub mod menu;
 pub mod persistence;
+pub mod watcher;
