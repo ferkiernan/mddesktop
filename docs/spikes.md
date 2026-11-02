@@ -18,7 +18,7 @@ Hallazgos:
 - Arranque: la ventana aparece en < 1 s (cumple SC-001 de < 2 s, a confirmar con release y disco frío).
 - CPU en reposo ≈ 0 una vez estabilizado.
 
-Decisión: seguir con Tauri/WebView2 (obligatorio). **Acción pendiente para el producto**: redefinir SC-002 (p. ej. medir solo el proceso de la app + renderer de la ventana, o fijar un objetivo realista como < 250 MB privados totales con 1 documento). Hasta entonces la medición se documenta, no se usa como puerta.
+Decisión: seguir con Tauri/WebView2 (obligatorio). **Resuelto 2026-11-01**: SC-002 redefinido a < 250 MB privados para todo el árbol de procesos con un documento abierto (antes: redefinir SC-002 (p. ej. medir solo el proceso de la app + renderer de la ventana, o fijar un objetivo realista como < 250 MB privados totales con 1 documento). Hasta entonces la medición se documenta, no se usa como puerta.)
 
 ## S2–S6
 

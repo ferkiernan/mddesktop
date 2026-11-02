@@ -27,7 +27,7 @@ Hallazgo central de la investigación ([research.md](research.md) R1): `mdwysiwy
 
 **Project Type**: desktop-app (Tauri: frontend web + backend Rust en un mismo repositorio)
 
-**Performance Goals**: arranque en frío < 2 s; RAM en reposo < 100 MB; CPU en reposo ≈ 0; cambio de pestaña < 100 ms; apertura de documento habitual < 500 ms (SC-001…SC-003), medidos con `scripts/perf/` en un equipo de referencia
+**Performance Goals**: arranque en frío < 2 s; RAM en reposo < 250 MB privados para todo el árbol de procesos con un documento abierto; CPU en reposo ≈ 0; cambio de pestaña < 100 ms; apertura de documento habitual < 500 ms (SC-001…SC-003), medidos con `scripts/perf/` en un equipo de referencia
 
 **Constraints**: offline total; sin Electron/Node/Chromium en producción; sin servidor HTTP; sin polling ni procesos residentes; acceso a disco solo vía comandos Rust con rutas autorizadas; permisos mínimos de Tauri; instalador sin requisitos extra para el usuario final
 

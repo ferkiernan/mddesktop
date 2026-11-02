@@ -122,7 +122,7 @@ Hasta que existan, el producto funciona con los fallbacks indicados; U1–U3 se 
 
 - Presupuestos de SC-001…SC-003 se miden con un script (`scripts/perf/`) en un equipo de referencia: arranque en frío (proceso → primer render interactivo), RSS del proceso y WebView2 en reposo, cambio de pestaña, apertura de documento.
 - Carga diferida: el chunk del editor (Tiptap/unified) se importa con `React.lazy` para pintar el shell primero; Mermaid ya es perezoso en la librería.
-- **Riesgo declarado**: `mdwysiwyg` arrastra Tiptap + unified + lowlight; el objetivo de <100 MB RAM no está garantizado → spike S1 decide antes de construir el resto (puerta de calidad, Principio I).
+- **Riesgo declarado**: `mdwysiwyg` arrastra Tiptap + unified + lowlight; el objetivo original de <100 MB RAM resultó inalcanzable con WebView2 (spike S1; redefinido a <250 MB privados en el árbol completo, SC-002) → el spike decidió antes de construir el resto (puerta de calidad, Principio I).
 
 ## Unknowns resueltos / pendientes
 

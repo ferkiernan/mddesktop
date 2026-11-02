@@ -228,7 +228,7 @@ El usuario inserta imágenes locales en un documento; la aplicación le ofrece c
 Las metas de rendimiento se miden y documentan en un equipo Windows de referencia a definir.
 
 - **SC-001**: La aplicación está lista para usar en menos de 2 segundos desde un inicio en frío.
-- **SC-002**: En reposo con un documento habitual abierto, la aplicación usa menos de 100 MB de memoria y un uso de CPU prácticamente nulo.
+- **SC-002**: En reposo con un documento habitual abierto, todo el árbol de procesos de la aplicación (incluido el motor de renderizado del sistema) usa menos de 250 MB de memoria privada y un uso de CPU prácticamente nulo.
 - **SC-003**: Cambiar de pestaña tarda menos de 100 ms y abrir un documento habitual tarda menos de 500 ms.
 - **SC-004**: Un usuario completa el flujo abrir → editar → guardar en menos de 1 minuto sin instrucciones previas.
 - **SC-005**: En el 100 % de las pruebas de cierre con cambios pendientes, el usuario recibe la confirmación y ningún cambio se pierde sin su decisión explícita.
