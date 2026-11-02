@@ -4,6 +4,11 @@ use crate::state::AppState;
 use tauri::{AppHandle, Manager, State};
 
 pub(crate) fn data(app: &AppHandle) -> AppResult<AppData> {
+    // Debug builds only: lets automated tests use an isolated data dir instead of the user's real one.
+    #[cfg(debug_assertions)]
+    if let Some(dir) = std::env::var_os("MDD_DATA_DIR") {
+        return Ok(AppData::new(dir));
+    }
     app.path()
         .app_data_dir()
         .map(AppData::new)

@@ -8,7 +8,10 @@ import { join } from "node:path";
 const exe = process.argv[2];
 const sizeKB = Number(process.argv[3] ?? 100);
 const exeName = exe.split(/[\\/]/).pop();
-rmSync(join(process.env.APPDATA, "com.ferkiernan.mddesktop"), { recursive: true, force: true });
+// isolated app-data dir (debug builds honor MDD_DATA_DIR): never touch the user's real data
+const DATA_DIR = join(process.env.TEMP, "mdd-e2e-data");
+rmSync(DATA_DIR, { recursive: true, force: true });
+process.env.MDD_DATA_DIR = DATA_DIR;
 const dir = join(process.env.TEMP, "mdd-perf");
 mkdirSync(dir, { recursive: true });
 const para = "## Seccion\n\nTexto de ejemplo con **negrita**, *cursiva* y un [enlace](https://example.com).\n\n- uno\n- dos\n- tres\n\n";

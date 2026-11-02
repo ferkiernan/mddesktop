@@ -5,6 +5,8 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const exe = process.argv[2];
+// isolated app-data dir (debug builds honor MDD_DATA_DIR): never touch the user's real data
+process.env.MDD_DATA_DIR = join(process.env.TEMP, "mdd-e2e-data");
 const dir = join(process.env.TEMP, "mdd-os-test");
 mkdirSync(dir, { recursive: true });
 const a = join(dir, "alpha.md"), b = join(dir, "beta.markdown"), c = join(dir, "gamma.txt");
