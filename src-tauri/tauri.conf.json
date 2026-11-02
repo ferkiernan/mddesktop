@@ -18,6 +18,7 @@
       }
     ],
     "security": {
+      "assetProtocol": { "enable": true, "scope": [] },
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: asset: http://asset.localhost; connect-src ipc: http://ipc.localhost"
     }
   },

@@ -9,6 +9,7 @@ use std::sync::Mutex;
 #[derive(Default)]
 pub struct AuthorizedPaths {
     set: Mutex<HashSet<PathBuf>>,
+    images: Mutex<HashSet<PathBuf>>,
 }
 
 pub fn is_markdown(path: &Path) -> bool {
@@ -50,7 +51,33 @@ pub fn canonical(path: &Path) -> AppResult<PathBuf> {
     }
 }
 
+pub fn is_image(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| matches!(e.to_ascii_lowercase().as_str(), "png" | "jpg" | "jpeg" | "gif" | "webp" | "svg" | "bmp"))
+        .unwrap_or(false)
+}
+
 impl AuthorizedPaths {
+    /// Authorizes an image the user picked in the native dialog (read-only source for import).
+    pub fn authorize_image(&self, path: &Path) -> AppResult<PathBuf> {
+        if !is_image(path) {
+            return Err(AppError::new(ErrorCode::InvalidArgument, "not a supported image type"));
+        }
+        let c = canonical(path)?;
+        self.images.lock().unwrap().insert(c.clone());
+        Ok(c)
+    }
+
+    pub fn check_image(&self, path: &Path) -> AppResult<PathBuf> {
+        let c = canonical(path)?;
+        if is_image(&c) && self.images.lock().unwrap().contains(&c) {
+            Ok(c)
+        } else {
+            Err(AppError::new(ErrorCode::NotAuthorized, "image was not picked by the user"))
+        }
+    }
+
     /// Adds a trusted path (caller must be a trusted origin). Returns the canonical path.
     pub fn authorize(&self, path: &Path) -> AppResult<PathBuf> {
         if !is_markdown(path) {

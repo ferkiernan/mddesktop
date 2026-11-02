@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { z } from "zod";
 import {
   FileFingerprintSchema,
+  ImportResultSchema,
   PreferencesSchema,
   ReadResultSchema,
   RecoveryEntrySchema,
@@ -70,4 +71,10 @@ export const settings = {
 export const app = {
   confirmExit: () => call("confirm_exit", Void),
   getLaunchFiles: () => call("get_launch_files", Paths),
+};
+
+export const images = {
+  pick: () => call("pick_image", z.string().nullable()),
+  import: (documentPath: string, sourcePath: string, overwrite = false) =>
+    call("import_image", ImportResultSchema, { documentPath, sourcePath, overwrite }),
 };

@@ -119,6 +119,7 @@ export const MenuActionIdSchema = z.enum([
   "file.close",
   "file.closeAll",
   "file.exit",
+  "insert.image",
   "edit.undo",
   "edit.redo",
   "edit.cut",
@@ -135,3 +136,10 @@ export const MenuActionIdSchema = z.enum([
 ]);
 export type MenuActionId = z.infer<typeof MenuActionIdSchema>;
 export const MenuActionEventSchema = z.object({ id: MenuActionIdSchema });
+
+export const ImportResultSchema = z.object({
+  relativePath: z.string(),
+  copied: z.boolean(),
+  existedBefore: z.boolean(),
+});
+export type ImportResult = z.infer<typeof ImportResultSchema>;

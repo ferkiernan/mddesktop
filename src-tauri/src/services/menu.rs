@@ -33,6 +33,10 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&item("edit.selectAll", "Seleccionar todo\tCtrl+A")?)
         .build()?;
 
+    let insert = SubmenuBuilder::new(app, "Insertar")
+        .item(&item("insert.image", "Imagen…")?)
+        .build()?;
+
     let view = SubmenuBuilder::new(app, "Ver")
         .item(&item("view.toggleTheme", "Alternar tema claro/oscuro")?)
         .separator()
@@ -43,7 +47,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&item("view.toggleStatusBar", "Mostrar/ocultar barra de estado")?)
         .build()?;
 
-    let menu = MenuBuilder::new(app).item(&file).item(&edit).item(&view).build()?;
+    let menu = MenuBuilder::new(app).item(&file).item(&edit).item(&insert).item(&view).build()?;
     app.set_menu(menu)?;
     app.on_menu_event(|app, event| {
         let _ = app.emit("menu://action", json!({ "id": event.id().as_ref() }));

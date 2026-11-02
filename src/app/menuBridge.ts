@@ -3,6 +3,7 @@ import { newDocument, openFiles, save, saveAs } from "../features/documents/acti
 import { requestClose, requestCloseAll, requestExit } from "../features/documents/closeFlow";
 import { useDocuments } from "../features/documents/store";
 import { activateNext } from "../features/tabs/tabs";
+import { insertImage } from "../features/images/insertImage";
 import { runEdit } from "../features/editor/editCommands";
 import { toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
 import type { MenuActionId } from "../services/contracts";
@@ -36,6 +37,9 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "tab.prev":
       activateNext(-1);
+      return;
+    case "insert.image":
+      void insertImage();
       return;
     case "edit.undo":
     case "edit.redo":

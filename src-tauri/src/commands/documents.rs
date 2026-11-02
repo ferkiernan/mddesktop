@@ -4,7 +4,7 @@ use crate::services::fs_service::{self, FileFingerprint, ReadResult, WriteReques
 use crate::state::AppState;
 use serde::Serialize;
 use std::path::PathBuf;
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 /// Default large-file threshold (FR-002a); becomes a preference in the settings story.
 const LARGE_FILE_WARN_BYTES: u64 = 5 * 1024 * 1024;
@@ -16,6 +16,7 @@ pub async fn pick_open_files(app: AppHandle, state: State<'_, AppState>) -> AppR
 
 #[tauri::command]
 pub async fn read_document(
+    app: AppHandle,
     state: State<'_, AppState>,
     path: PathBuf,
     accept_large: bool,
@@ -23,6 +24,7 @@ pub async fn read_document(
     let path = state.authorized.check(&path)?;
     let r = fs_service::read_document(&path, accept_large, LARGE_FILE_WARN_BYTES)?;
     state.known.set(&path, r.fingerprint.clone());
+    allow_assets(&app, &path);
     Ok(r)
 }
 
@@ -43,12 +45,14 @@ pub struct WriteResult {
 
 #[tauri::command]
 pub async fn write_document(
+    app: AppHandle,
     state: State<'_, AppState>,
     mut request: WriteRequest,
 ) -> AppResult<WriteResult> {
     request.path = state.authorized.check(&request.path)?;
     let fingerprint = fs_service::write_document(&request)?;
     state.known.set(&request.path, fingerprint.clone());
+    allow_assets(&app, &request.path);
     Ok(WriteResult { fingerprint })
 }
 
@@ -86,4 +90,11 @@ pub async fn watch_documents(
             let _ = app.emit("fs://external-change", change);
         })
         .map_err(|e| AppError::new(ErrorCode::Io, e.to_string()))
+}
+
+/// Lets the webview display images stored next to an authorized document (asset: protocol).
+fn allow_assets(app: &AppHandle, document: &std::path::Path) {
+    if let Some(dir) = document.parent() {
+        let _ = app.asset_protocol_scope().allow_directory(dir, true);
+    }
 }

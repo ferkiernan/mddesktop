@@ -53,6 +53,8 @@ pub fn run() {
             commands::session::recovery_delete,
             commands::session::settings_load,
             commands::session::settings_save,
+            commands::images::pick_image,
+            commands::images::import_image,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
