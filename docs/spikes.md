@@ -20,17 +20,27 @@ Hallazgos:
 
 Decisión: seguir con Tauri/WebView2 (obligatorio). **Resuelto 2026-11-01**: SC-002 redefinido a < 250 MB privados para todo el árbol de procesos con un documento abierto (antes: redefinir SC-002 (p. ej. medir solo el proceso de la app + renderer de la ventana, o fijar un objetivo realista como < 250 MB privados totales con 1 documento). Hasta entonces la medición se documenta, no se usa como puerta.)
 
-## S2–S6
+## S2 — Fidelidad del Markdown (2026-11-02) ✔
 
-Se resuelven dentro de la fase de cada historia para no bloquear el núcleo, con estos valores por defecto:
+`tests/e2e/ui/fidelity.spec.ts` (editor real en Chromium, corpus de `tests/fixtures/markdown/`):
 
-| Spike | Se resuelve en | Valor por defecto hasta entonces |
-|---|---|---|
-| S2 fidelidad Markdown | US1 (T026, necesita el editor integrado) | Abrir/alternar es byte-exacto por contrato de la librería; la app solo guarda el `content` que ya tiene |
-| S3 single-instance + fileAssociations | US5 | Plugin ya registrado primero en `lib.rs` |
-| S4 menú Edición nativo | US6 | Menú nativo sin aceleradores para Ctrl+Z/Y/X/C/V/A; si falla, menú HTML |
-| S5 E2E sobre WebView2 | Fase 10 / primera prueba nativa (US4) | Capa `ui` con IPC simulado |
-| S6 DnD de pestañas | US2 | Pointer Events propios |
+- **Sin editar** (abrir, alternar vistas, guardar): el contenido que la app escribe es idéntico al original (gfm, no canónico, mermaid).
+- **Tras editar en WYSIWYG** el documento completo se reserializa en forma canónica, incluso lo que no se tocó:
+  `*   item` → `- item`, `__fuerte__` → `**fuerte**`, `_enfasis_` → `*enfasis*`. El contenido semántico se conserva (listas, énfasis, tablas, código, tareas, mermaid).
+- Mitigación vigente: documentado en `docs/mdwysiwyg-limitations.md`; la vista Markdown permite editar sin normalizar; EOL y BOM los reaplica Rust.
+
+## S3 — single-instance y asociaciones (2026-11-01) ◐
+
+- ✔ Verificado en la app real (`tests/e2e/native/os-integration.cdp.mjs`): el archivo por argumento se abre; una segunda ejecución reenvía sus archivos a la ventana existente y termina; los no-Markdown se rechazan con aviso.
+- ◐ `fileAssociations` (`.md`, `.markdown`) está en `tauri.conf.json` y el instalador NSIS se construye (4.98 MiB). **No instalado**: el registro real de las asociaciones en Windows queda por validar en una máquina limpia (T116).
+
+## S4 — Menú Edición (2026-11-02) ◐
+
+Decisión: menú nativo con ítems propios y **sin aceleradores** (todos los atajos los gestiona `src/features/shortcuts/manager.ts`); las acciones de Edición se dirigen al editor activo (`editCommands.ts`: teclas sintéticas para deshacer/rehacer en ProseMirror, `execCommand` para cortar/copiar/seleccionar, portapapeles asíncrono para pegar). Los atajos de teclado reales (Ctrl+N/Tab/Shift+Tab/W) se verificaron en la ventana real. Los clics en el menú nativo no se automatizaron; pegar desde el menú puede requerir permiso de portapapeles (con aviso de usar Ctrl+V si falla).
+
+## S6 — Reordenar pestañas (2026-11-02) ✔
+
+Pointer Events propios (`usePointerReorder.ts`); `tests/e2e/ui/tabs.spec.ts` arrastra con el ratón y comprueba el orden. No se probó el DnD HTML5 nativo de WebView2 (innecesario).
 
 ## S5 — Automatización del WebView2 real (2026-11-01) ✔
 
