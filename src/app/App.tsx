@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import "./theme.css";
+import { SpikeEditors, spikeEnabled } from "./SpikeEditors";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -19,7 +20,7 @@ export default function App() {
     <ErrorBoundary>
       <div className="app">
         <div className="app-tabs" role="tablist" aria-label="Documentos abiertos" />
-        <main className="app-main" />
+        <main className="app-main" style={{ overflow: "auto" }}>{spikeEnabled && <SpikeEditors />}</main>
         <footer className="app-status">Listo</footer>
       </div>
     </ErrorBoundary>

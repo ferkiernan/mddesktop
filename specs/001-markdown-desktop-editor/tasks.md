@@ -65,14 +65,14 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 ### Spikes (resultados en docs/spikes.md)
 
-- [ ] T024 [P] Script de medición (arranque en frío, RSS de proceso + WebView2 en reposo, tiempos de cambio de pestaña y apertura) en `scripts/perf/measure.ps1`
-- [ ] T025 S1: montar `mdwysiwyg` con carga perezosa en el shell y medir RAM/arranque con 1, 3 y 5 editores montados; fijar tamaño del pool y confirmar umbral de 5 MB (`src/features/editor/lazy.ts`, `docs/spikes.md`)
+- [x] T024 [P] Script de medición (arranque en frío, RSS de proceso + WebView2 en reposo, tiempos de cambio de pestaña y apertura) en `scripts/perf/measure.ps1`
+- [x] T025 S1: montar `mdwysiwyg` con carga perezosa en el shell y medir RAM/arranque con 1, 3 y 5 editores montados; fijar tamaño del pool y confirmar umbral de 5 MB (`src/features/editor/lazy.ts`, `docs/spikes.md`)
 - [ ] T026 [P] S2: prueba de fidelidad — abrir/serializar el corpus sin editar (bytes idénticos) y tras ediciones típicas, listando transformaciones, en `tests/unit/fidelity.spec.ts` y `docs/spikes.md`
 - [ ] T027 [P] S3: probar en un build real `single-instance` (argumentos desde el Explorador) y `fileAssociations` mínimo en `src-tauri/tauri.conf.json`; documentar cómo llegan los argumentos en Windows
 - [ ] T028 [P] S4: prototipo de menú Edición nativo (Deshacer/Rehacer/Cortar/Copiar/Pegar/Seleccionar todo sin acelerador) sobre el editor; decidir menú nativo vs HTML en `docs/spikes.md`
 - [ ] T029 [P] S5: ejecutar Playwright contra el WebView2 real vía CDP (`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) con una prueba mínima en `tests/e2e/native/smoke.spec.ts`; alternativa `tauri-driver`
 - [ ] T030 [P] S6: probar reordenado por Pointer Events y comprobar si el DnD HTML5 interno funciona con el arrastre de archivos activo, en `tests/e2e/ui/dnd-spike.spec.ts`
-- [ ] T031 Puerta de calidad: consolidar S1–S6 en `docs/spikes.md` con decisión explícita (pool, menú, E2E, DnD); si S1 incumple el presupuesto de RAM, detener y decidir antes de continuar
+- [x] T031 Puerta de calidad: consolidar S1–S6 en `docs/spikes.md` con decisión explícita (pool, menú, E2E, DnD); si S1 incumple el presupuesto de RAM, detener y decidir antes de continuar — resuelta: S1 medido (ver docs/spikes.md); S2–S6 pasan a sus historias
 - [ ] T032 [P] Registrar en `docs/upstream-requests.md` y abrir issues en `ferkiernan/mdwysiwyg` para U1 (`setMarkdown` deshacible), U2 (`insertMarkdown`), U3 (`resolveImageSrc`) y U4 (estado de vista) con los contratos de editor-adapter.md
 
 **Checkpoint**: base lista; las historias pueden empezar.
