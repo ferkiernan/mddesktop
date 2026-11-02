@@ -10,6 +10,8 @@ use std::sync::Mutex;
 pub struct AuthorizedPaths {
     set: Mutex<HashSet<PathBuf>>,
     images: Mutex<HashSet<PathBuf>>,
+    /// Output paths chosen in the export dialog; consumed by the write (feature 002).
+    exports: Mutex<HashSet<PathBuf>>,
 }
 
 pub fn is_markdown(path: &Path) -> bool {
@@ -51,6 +53,24 @@ pub fn canonical(path: &Path) -> AppResult<PathBuf> {
     }
 }
 
+/// Output extension for an export format id, or `None` when the format is unknown.
+pub fn export_extension(format: &str) -> Option<&'static str> {
+    match format {
+        "html" => Some("html"),
+        "pdf" => Some("pdf"),
+        "docx" => Some("docx"),
+        "odt" => Some("odt"),
+        _ => None,
+    }
+}
+
+fn is_export_path(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| export_extension(&e.to_ascii_lowercase()).is_some())
+        .unwrap_or(false)
+}
+
 pub fn is_image(path: &Path) -> bool {
     path.extension()
         .and_then(|e| e.to_str())
@@ -59,6 +79,32 @@ pub fn is_image(path: &Path) -> bool {
 }
 
 impl AuthorizedPaths {
+    /// Authorizes an output path returned by the native export dialog.
+    pub fn authorize_export(&self, path: &Path) -> AppResult<PathBuf> {
+        if !is_export_path(path) {
+            return Err(AppError::new(ErrorCode::InvalidArgument, "not an export file type"));
+        }
+        let c = canonical(path)?;
+        self.exports.lock().unwrap().insert(c.clone());
+        Ok(c)
+    }
+
+    pub fn check_export(&self, path: &Path) -> AppResult<PathBuf> {
+        if !is_export_path(path) {
+            return Err(AppError::new(ErrorCode::InvalidArgument, "not an export file type"));
+        }
+        let c = canonical(path)?;
+        if self.exports.lock().unwrap().contains(&c) {
+            Ok(c)
+        } else {
+            Err(AppError::new(ErrorCode::NotAuthorized, "path was not chosen in the export dialog"))
+        }
+    }
+
+    pub fn revoke_export(&self, path: &Path) {
+        self.exports.lock().unwrap().remove(path);
+    }
+
     /// Authorizes an image the user picked in the native dialog (read-only source for import).
     pub fn authorize_image(&self, path: &Path) -> AppResult<PathBuf> {
         if !is_image(path) {

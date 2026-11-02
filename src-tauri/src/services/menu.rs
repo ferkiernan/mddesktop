@@ -23,12 +23,20 @@ pub const EDITOR_STYLES: &[(&str, &str)] = &[
 pub fn setup(app: &mut App) -> tauri::Result<()> {
     let item = |id: &str, text: &str| MenuItemBuilder::with_id(id, text).build(app);
 
+    let export = SubmenuBuilder::new(app, "Exportar")
+        .item(&item("export.html", "Página web (.html)…")?)
+        .item(&item("export.pdf", "PDF (.pdf)…")?)
+        .item(&item("export.docx", "Word (.docx)…")?)
+        .item(&item("export.odt", "OpenDocument (.odt)…")?)
+        .build()?;
+
     let file = SubmenuBuilder::new(app, "Archivo")
         .item(&item("file.new", "Nuevo\tCtrl+N")?)
         .item(&item("file.open", "Abrir…\tCtrl+O")?)
         .separator()
         .item(&item("file.save", "Guardar\tCtrl+S")?)
         .item(&item("file.saveAs", "Guardar como…\tCtrl+Shift+S")?)
+        .item(&export)
         .separator()
         .item(&item("file.close", "Cerrar documento\tCtrl+W")?)
         .item(&item("file.closeAll", "Cerrar todos")?)

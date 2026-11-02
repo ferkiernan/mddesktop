@@ -2046,6 +2046,7 @@ dependencies = [
 name = "mddesktop"
 version = "0.1.0"
 dependencies = [
+ "base64 0.23.1",
  "chardetng",
  "encoding_rs",
  "notify",

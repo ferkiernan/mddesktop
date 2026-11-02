@@ -31,6 +31,7 @@ chardetng = "1.0.0"
 xxhash-rust = { version = "0.8.19", features = ["xxh3"] }
 thiserror = "2.0.21"
 uuid = { version = "1.29.0", features = ["v4"] }
+base64 = "0.23.1"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
