@@ -65,3 +65,45 @@ describe("close flow", () => {
     void a;
   });
 });
+
+describe("exit keeps unsaved work in temp storage (no prompt)", () => {
+  it("writes recovery for every modified document, saves the session and quits without asking", async () => {
+    const { installMockIpc } = await import("../helpers/mockIpc");
+    const { requestExit } = await import("../../src/features/documents/closeFlow");
+    const ipc = installMockIpc({ recovery_write: () => null, session_save: () => null, confirm_exit: () => null });
+    docs(3, [0, 2]);
+    await requestExit();
+    const cmds = ipc.calls.map((c) => c.cmd);
+    expect(cmds.filter((c) => c === "recovery_write")).toHaveLength(2); // only the modified ones
+    expect(cmds.indexOf("session_save")).toBeGreaterThan(cmds.lastIndexOf("recovery_write"));
+    expect(cmds.at(-1)).toBe("confirm_exit");
+    expect(askMock).not.toHaveBeenCalled();
+    expect(useDocuments.getState().order).toHaveLength(3); // tabs untouched; state comes back on next launch
+    ipc.restore();
+  });
+
+  it("quits straight away when nothing is modified", async () => {
+    const { installMockIpc } = await import("../helpers/mockIpc");
+    const { requestExit } = await import("../../src/features/documents/closeFlow");
+    const ipc = installMockIpc({ session_save: () => null, confirm_exit: () => null });
+    docs(2);
+    await requestExit();
+    expect(ipc.calls.map((c) => c.cmd)).toEqual(["session_save", "confirm_exit"]);
+    ipc.restore();
+  });
+
+  it("if the recovery write fails it falls back to asking and keeps the app open on Cancelar", async () => {
+    const { installMockIpc } = await import("../helpers/mockIpc");
+    const { requestExit } = await import("../../src/features/documents/closeFlow");
+    const ipc = installMockIpc({
+      recovery_write: () => Promise.reject({ code: "DISK_FULL", message: "disk full" }),
+      confirm_exit: () => null,
+    });
+    docs(1, [0]);
+    askMock.mockResolvedValue("cancel");
+    await requestExit();
+    expect(askMock).toHaveBeenCalled();
+    expect(ipc.calls.some((c) => c.cmd === "confirm_exit")).toBe(false);
+    ipc.restore();
+  });
+});

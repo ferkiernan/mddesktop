@@ -13,10 +13,11 @@ function clearTimer(id: string) {
   timers.delete(id);
 }
 
-export async function flushRecovery(id: string): Promise<void> {
+/** Writes the document's unsaved content to the recovery store. Resolves false only if the write failed. */
+export async function flushRecovery(id: string): Promise<boolean> {
   clearTimer(id);
   const d = useDocuments.getState().docs[id];
-  if (!d || !d.isDirty) return;
+  if (!d || !d.isDirty) return true;
   try {
     await session.recoveryWrite({
       documentId: id,
@@ -29,8 +30,9 @@ export async function flushRecovery(id: string): Promise<void> {
       content: d.content,
     });
     written.add(id);
+    return true;
   } catch {
-    /* recovery is best effort; the next change retries */
+    return false; // best effort while editing; the caller decides what a failure means
   }
 }
 

@@ -1,4 +1,6 @@
-import { app } from "../../services/ipc";
+import { app, session } from "../../services/ipc";
+import { flushRecovery } from "../session/recoveryWriter";
+import { buildSession } from "../session/sessionManager";
 import { ask } from "../../ui/dialogs";
 import { save } from "./actions";
 import { useDocuments } from "./store";
@@ -34,7 +36,24 @@ export async function requestClose(ids: string[]): Promise<boolean> {
 
 export const requestCloseAll = () => requestClose(useDocuments.getState().order.slice());
 
-/** Resolves pending changes for every tab and, if none is cancelled, quits the app. */
+/**
+ * Quits the app. Unsaved changes are NOT lost and the user is NOT asked: every modified
+ * document is written to the recovery store (temp) and the session is saved; on the next
+ * launch everything comes back as "modified" and the user decides whether to save.
+ * Only if a recovery write fails do we fall back to asking Guardar / Descartar / Cancelar.
+ */
 export async function requestExit(): Promise<void> {
-  if (await requestCloseAll()) await app.confirmExit();
+  const { docs, order } = useDocuments.getState();
+  const dirty = order.filter((id) => docs[id]?.isDirty);
+  const results = await Promise.all(dirty.map((id) => flushRecovery(id)));
+  if (results.every(Boolean)) {
+    try {
+      await session.save(buildSession());
+    } catch {
+      /* the session file is only a convenience; recovery entries already hold the work */
+    }
+    await app.confirmExit();
+    return;
+  }
+  if (await requestCloseAll()) await app.confirmExit(); // could not keep the changes: ask
 }

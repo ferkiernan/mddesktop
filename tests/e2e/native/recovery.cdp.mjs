@@ -1,5 +1,5 @@
 // Run: node tests/e2e/native/recovery.cdp.mjs <path-to-built-exe>   (debug build, WebView2 CDP)
-// Kills the app abruptly with unsaved edits, relaunches, and checks the recovery flow (US4).
+// Unsaved edits survive a crash (killed process) and a normal close; relaunch restores them as modified, no prompt (US4).
 import { spawn, execSync } from "node:child_process";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
@@ -56,16 +56,35 @@ await sleep(5500); // > 4 s recovery debounce
 kill();
 await sleep(1500);
 
-// --- run 2: expect the recovery dialog ---
+const state = (app) => app.evalJs(`JSON.stringify({dialog:document.querySelector(".dialog")?.innerText ?? null, tabs:[...document.querySelectorAll("[role=tab] .tab-name")].map(e=>e.textContent), dirty:!!document.querySelector(".tab-dirty"), text:document.querySelector(".editor-slot:not([hidden]) .ProseMirror")?.innerText})`);
+const isRunning = () => execSync(`tasklist /FI "IMAGENAME eq ${exeName}" /NH`).toString().includes(exeName);
+
+// --- run 2 (after a crash): everything is restored as modified, WITHOUT any prompt ---
 app = await launch();
-await sleep(3500);
-const dialog = await app.evalJs(`document.querySelector(".dialog")?.innerText ?? null`);
-console.log("1) dialog:", JSON.stringify(dialog));
-await app.evalJs(`[...document.querySelectorAll(".dialog button")].find(b=>b.textContent==="Recuperar").click()`);
-await sleep(2500);
-const after = await app.evalJs(`JSON.stringify({tabs:[...document.querySelectorAll("[role=tab] .tab-name")].map(e=>e.textContent), dirty:!!document.querySelector(".tab-dirty"), text:document.querySelector(".editor-slot:not([hidden]) .ProseMirror")?.innerText})`);
-console.log("2) after recover:", after);
-const ok = dialog?.includes("Recuperar") && after.includes("texto sin guardar para recuperar");
+await sleep(4000);
+const s2 = JSON.parse(await state(app));
+console.log("1) after crash:", JSON.stringify(s2));
+const ok1 = s2.dialog === null && s2.dirty && s2.text.includes("texto sin guardar para recuperar");
+
+// --- graceful close with edits newer than the 4 s debounce: closing keeps them, no prompt ---
+await app.evalJs(`document.querySelector(".editor-slot:not([hidden]) .ProseMirror").focus()`);
+await app.send("Input.insertText", { text: " Y MAS CAMBIOS" });
+await sleep(800);
+execSync(`taskkill /IM ${exeName}`, { stdio: "ignore" }); // no /F: sends WM_CLOSE like the window X button
+let exited = false;
+for (let i = 0; i < 40 && !exited; i++) { await sleep(250); exited = !isRunning(); }
+console.log("2) exited on its own without a dialog:", exited);
+if (!exited) kill();
+await sleep(1000);
+
+// --- run 3: the latest edits are back, still modified ---
+app = await launch();
+await sleep(4000);
+const s3 = JSON.parse(await state(app));
+console.log("3) after graceful close:", JSON.stringify(s3));
+const ok2 = exited && s3.dialog === null && s3.dirty && s3.text.includes("Y MAS CAMBIOS");
+
+const ok = ok1 && ok2;
 console.log(ok ? "PASS" : "FAIL");
 kill();
 process.exit(ok ? 0 : 1);

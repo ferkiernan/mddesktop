@@ -1,7 +1,7 @@
 import { documents, session } from "../../services/ipc";
 import { fileNameOf } from "../documents/types";
 import { useDocuments } from "../documents/store";
-import { ask } from "../../ui/dialogs";
+import { toast } from "../../ui/Toast";
 import { flushRecovery } from "./recoveryWriter";
 
 let restoring: Promise<void> | null = null;
@@ -20,18 +20,8 @@ async function doRestore(): Promise<void> {
   const [prev, entries] = await Promise.all([session.load(), session.recoveryList()]);
   const byId = new Map(entries.map((e) => [e.documentId, e]));
 
-  let recover = false;
-  if (entries.length > 0) {
-    const choice = await ask({
-      title: "Recuperar documentos",
-      message: `Hay ${entries.length} documento(s) con cambios sin guardar de la sesión anterior. ¿Recuperarlos?`,
-      buttons: [
-        { label: "Descartar", value: "discard" },
-        { label: "Recuperar", value: "recover", primary: true },
-      ],
-    });
-    recover = choice === "recover";
-  }
+  // Unsaved work is always restored (as "modified"); the user decides later whether to save it.
+  const recover = entries.length > 0;
 
   const store = () => useDocuments.getState();
   const idMap = new Map<string, string>();
@@ -73,6 +63,10 @@ async function doRestore(): Promise<void> {
   // persist under the new ids first, then drop the old entries
   await Promise.all(restored.map((id) => flushRecovery(id)));
   await Promise.all(entries.map((e) => session.recoveryDelete(e.documentId).catch(() => undefined)));
+
+  if (restored.length > 0) {
+    toast(`Se restauraron ${restored.length} documento(s) con cambios sin guardar`, 4000);
+  }
 
   const active = prev?.activeDocumentId ? idMap.get(prev.activeDocumentId) : undefined;
   if (active) store().setActive(active);

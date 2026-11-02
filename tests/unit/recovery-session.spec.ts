@@ -97,7 +97,6 @@ describe("session restore (FR-021)", () => {
       recovery_write: () => null,
       recovery_delete: () => null,
     });
-    askMock.mockResolvedValue("recover");
     await restoreSession();
     const { docs, order, activeId } = useDocuments.getState();
     expect(order).toHaveLength(2);
@@ -107,6 +106,7 @@ describe("session restore (FR-021)", () => {
     expect(b.isDirty).toBe(false);
     expect(activeId).toBe(b.id);
     expect(ipc.calls.some((c) => c.cmd === "recovery_delete" && c.args?.documentId === "doc-a")).toBe(true);
+    expect(askMock).not.toHaveBeenCalled();
   });
 
   it("flags the document when the file changed on disk while the app was closed", async () => {
@@ -120,14 +120,13 @@ describe("session restore (FR-021)", () => {
       recovery_write: () => null,
       recovery_delete: () => null,
     });
-    askMock.mockResolvedValue("recover");
     await restoreSession();
     const d = Object.values(useDocuments.getState().docs)[0];
     expect(d.externalState).toBe("modified");
     expect(d.content).toBe("mi version");
   });
 
-  it("recovers untitled documents and orphan entries; Descartar restores tabs only", async () => {
+  it("recovers untitled documents and orphan entries automatically", async () => {
     const base = {
       session_load: () => ({
         version: 1, savedAt: 1, activeDocumentId: "doc-u",
@@ -138,15 +137,11 @@ describe("session restore (FR-021)", () => {
       recovery_delete: () => null,
     };
     ipc = installMockIpc(base);
-    askMock.mockResolvedValue("recover");
     await restoreSession();
-    expect(Object.values(useDocuments.getState().docs).map((d) => d.content).sort()).toEqual(["huerfano", "sin titulo"]);
-
-    useDocuments.setState({ docs: {}, order: [], activeId: null, untitledCounter: 0 });
-    _resetRestoreForTests();
-    askMock.mockResolvedValue("discard");
-    await restoreSession();
-    expect(useDocuments.getState().order).toHaveLength(0);
+    const docs = Object.values(useDocuments.getState().docs);
+    expect(docs.map((d) => d.content).sort()).toEqual(["huerfano", "sin titulo"]);
+    expect(docs.every((d) => d.isDirty)).toBe(true); // everything comes back as "modified"
+    expect(askMock).not.toHaveBeenCalled(); // no recovery prompt: the user decides about saving later
   });
 
   it("starts clean when there is no previous session", async () => {
