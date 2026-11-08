@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
-    "mdwysiwyg": "^0.2.1",
+    "mdwysiwyg": "^0.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^4.6.7",
