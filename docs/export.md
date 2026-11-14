@@ -35,3 +35,17 @@ node scripts/build-test-exe.mjs            # exe de depuración con otro identif
 node tests/e2e/native/export.cdp.mjs <exe> # 4 formatos sobre la app real (WebView2)
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
+
+## Panel de exportación (feature 005)
+
+- Archivo → Exportar abre primero un panel: lista de estilos ("Como en pantalla" = estilo activo, o cualquier estilo) y vista previa. Se recuerda el último estilo (`exportStyle`).
+- La vista previa usa el mismo proceso que el archivo y "Exportar…" escribe **esos mismos bytes**: el PDF tiene exactamente las páginas que se vieron.
+- El estilo elegido se aplica solo al visor oculto (variables en su contenedor; clase `mdd-export-editor`). El zoom de pantalla nunca llega a la exportación (`--mdw-content-zoom: 1`).
+- PDF sin cortes: imágenes/diagramas más altos o anchos que la página se reducen proporcionalmente (aviso si quedan por debajo del 50 %); tablas anchas se reducen; el código parte sus líneas; los bloques más altos que una página se cortan entre renglones (mínimo 2 líneas a cada lado) o entre filas; las tablas largas repiten la fila de encabezado.
+
+## Word y OpenDocument nativos (feature 006)
+
+- `.docx` y `.odt` ya no son imágenes de página: texto editable con estilos de encabezado (panel de navegación), listas numeradas/viñetas, tareas (☐/☑), citas, código con sus colores, tablas reales (encabezado repetido, filas que no se parten, alineación), hipervínculos e imágenes con texto alternativo. Solo los diagramas Mermaid se insertan como imagen (PNG nítido).
+- Página A4 con márgenes de 15 mm; colores y tipografías del estilo elegido (tipografías poco comunes se sustituyen por una de uso común); contraste del texto ≥ 4,5:1. En estilos oscuros se usa color de página y se avisa de la opción de impresión de fondos.
+- La paginación la hace el programa que abre el archivo; la vista previa del panel muestra el contenido y los colores (página continua).
+- Código: `src/features/export/native/` (`model.ts` DOM → documento estructurado; `docx.ts`, `odt.ts` escritores; `color.ts`).

@@ -1,8 +1,6 @@
 import { chromeOf, findStyle } from "./applyStyle";
 import { useSettings } from "./store";
 
-const ZOOM_STEP = 0.1;
-const round = (n: number) => Math.round(n * 100) / 100;
 
 /** Selects an editor style preset; `theme` follows the preset (light/dark chrome). */
 export const setEditorStyle = (id: string) => {
@@ -17,12 +15,8 @@ export const setEditorStyle = (id: string) => {
 export const toggleTheme = () =>
   setEditorStyle(chromeOf(findStyle(useSettings.getState().prefs.editorStyle)).dark ? "default" : "dark");
 
-export const zoomBy = (delta: number) =>
-  useSettings.getState().update({ uiZoom: Math.min(2, Math.max(0.7, round(useSettings.getState().prefs.uiZoom + delta))) });
-
-export const zoomIn = () => zoomBy(ZOOM_STEP);
-export const zoomOut = () => zoomBy(-ZOOM_STEP);
-export const zoomReset = () => useSettings.getState().update({ uiZoom: 1 });
+// spec 007: View zoom acts on the document content only (5 % steps); see zoom.ts
+export { zoomIn, zoomOut, zoomReset } from "./zoom";
 
 /** Ver > Mostrar barra de herramientas (mdwysiwyg `showToolbar`). */
 export const toggleEditorToolbar = () =>

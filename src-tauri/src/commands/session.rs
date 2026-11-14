@@ -61,6 +61,20 @@ pub async fn recovery_delete(app: AppHandle, document_id: String) -> AppResult<(
     data(&app)?.recovery_delete(&document_id)
 }
 
+/// Custom editor styles (spec 004).
+#[tauri::command]
+pub async fn styles_load(app: AppHandle) -> AppResult<crate::services::custom_styles::LoadedStyles> {
+    crate::services::custom_styles::load(data(&app)?.dir())
+}
+
+#[tauri::command]
+pub async fn styles_save(
+    app: AppHandle,
+    styles: Vec<crate::services::custom_styles::CustomStyle>,
+) -> AppResult<Vec<crate::services::custom_styles::CustomStyle>> {
+    crate::services::custom_styles::save(data(&app)?.dir(), styles)
+}
+
 #[tauri::command]
 pub async fn settings_load(app: AppHandle) -> AppResult<Preferences> {
     data(&app)?.load_settings()

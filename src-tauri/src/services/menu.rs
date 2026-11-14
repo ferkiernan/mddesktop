@@ -63,11 +63,11 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     let history = CheckMenuItemBuilder::with_id("settings.toggleHistory", "Historial de versiones").checked(true).build(app)?;
 
     let view = SubmenuBuilder::new(app, "Ver")
-        .item(&item("view.toggleTheme", "Alternar tema claro/oscuro")?)
+        .item(&item("view.toggleTheme", "Alternar estilo claro/oscuro")?)
         .separator()
-        .item(&item("view.zoomIn", "Acercar interfaz\tCtrl++")?)
-        .item(&item("view.zoomOut", "Alejar interfaz\tCtrl+-")?)
-        .item(&item("view.zoomReset", "Restablecer zoom\tCtrl+0")?)
+        .item(&item("view.zoomIn", "Acercar contenido\tCtrl++")?)
+        .item(&item("view.zoomOut", "Alejar contenido\tCtrl+-")?)
+        .item(&item("view.zoomReset", "Tamaño normal del contenido\tCtrl+0")?)
         .separator()
         .item(&item("view.toggleStatusBar", "Mostrar/ocultar barra de estado")?)
         .item(&toolbar)
@@ -83,8 +83,12 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         styles = styles.item(&check);
         state.style_items.lock().unwrap().push((id.to_string(), check));
     }
+    let styles = styles.build()?;
+    *state.style_menu.lock().unwrap() = Some(styles.clone());
+    let themes = item("settings.themes", "Temas…")?;
     let settings = SubmenuBuilder::new(app, "Configuración")
-        .item(&styles.build()?)
+        .item(&styles)
+        .item(&themes)
         .separator()
         .item(&history)
         .build()?;

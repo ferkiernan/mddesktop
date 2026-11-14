@@ -80,15 +80,16 @@ describe("appearance (theme, zoom, status bar)", () => {
     expect(document.documentElement.dataset.theme).toBe("light");
   });
 
-  it("zooms within 0.7-2.0 and resets", async () => {
+  it("View zoom changes the content zoom in 5 % steps within 50-300 % (spec 007)", async () => {
     await zoomIn();
-    expect(useSettings.getState().prefs.uiZoom).toBe(1.1);
-    for (let i = 0; i < 30; i++) await zoomIn();
-    expect(useSettings.getState().prefs.uiZoom).toBe(2);
-    for (let i = 0; i < 30; i++) await zoomOut();
-    expect(useSettings.getState().prefs.uiZoom).toBe(0.7);
+    expect(useSettings.getState().prefs.contentZoom).toBe(1.05);
+    for (let i = 0; i < 60; i++) await zoomIn();
+    expect(useSettings.getState().prefs.contentZoom).toBe(3);
+    for (let i = 0; i < 80; i++) await zoomOut();
+    expect(useSettings.getState().prefs.contentZoom).toBe(0.5);
     await zoomReset();
-    expect(useSettings.getState().prefs.uiZoom).toBe(1);
+    expect(useSettings.getState().prefs.contentZoom).toBe(1);
+    expect(document.documentElement.style.getPropertyValue("zoom")).toBe(""); // no whole-window zoom any more
   });
 
   it("toggles the status bar", async () => {

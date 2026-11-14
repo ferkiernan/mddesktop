@@ -21,6 +21,8 @@ export async function handleExternalChange(ev: ExternalChange): Promise<void> {
   ) {
     return;
   }
+  // the user already chose to ignore (or rejected) exactly this disk version
+  if (ev.kind === "modified" && ev.fingerprint && doc.ignoredHash === ev.fingerprint.hash) return;
   resolving.add(doc.id);
   try {
     await resolveExternalChange(doc.id, ev.kind !== "modified");

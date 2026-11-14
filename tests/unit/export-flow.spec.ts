@@ -23,10 +23,27 @@ vi.mock("../../src/features/export/rasterize", () => ({
   renderPages: async (_s: unknown, onProgress?: (p: number, n: number) => void) => {
     onProgress?.(1, 2);
     onProgress?.(2, 2);
-    return [
-      { index: 0, jpeg: J, width: 1588, height: 2246 },
-      { index: 1, jpeg: J, width: 1588, height: 2246 },
-    ];
+    return {
+      pages: [
+        { index: 0, jpeg: J, width: 1588, height: 2246 },
+        { index: 1, jpeg: J, width: 1588, height: 2246 },
+      ],
+      warnings: [],
+    };
+  },
+}));
+// Word/ODT are native since spec 006 (their writers are covered by export-native.spec.ts)
+vi.mock("../../src/features/export/native/build", () => ({
+  buildNativeDocument: async () => ({ bytes: Uint8Array.from([0x50, 0x4b, 0x03, 0x04]), warnings: [] }),
+}));
+// spec 005: the export panel builds the preview and the user clicks "Exportar…" right away
+const progress = vi.hoisted(() => [] as string[]);
+const panelCalls = vi.hoisted(() => [] as unknown[]);
+vi.mock("../../src/features/export/exportPanelStore", () => ({
+  openExportPanel: async (opts: { format: string; markdown: string; title: string; documentId?: string }) => {
+    panelCalls.push(opts);
+    const m = await import("../../src/features/export/exportDocument");
+    return m.buildExport(opts.markdown, opts.format as never, opts.title, (p) => progress.push(p), opts.documentId);
   },
 }));
 
@@ -42,6 +59,8 @@ beforeEach(() => {
   askMock.mockReset();
   askMock.mockResolvedValue("ok");
   toastMock.mockReset();
+  progress.length = 0;
+  panelCalls.length = 0;
 });
 afterEach(() => ipc?.restore());
 
@@ -86,13 +105,14 @@ describe("export flow (File > Export)", () => {
     ["pdf", "%PDF-1.4", "C:\\out\\a.pdf"],
     ["docx", "PK", "C:\\out\\a.docx"],
     ["odt", "PK", "C:\\out\\a.odt"],
-  ] as const)("%s: renders pages with progress and writes a valid package", async (format, magic, path) => {
+  ] as const)("%s: builds the preview in the panel and writes those bytes", async (format, magic, path) => {
     ipc = installMockIpc({ pick_export_path: () => path, write_export: () => ({ bytes: 1 }) });
     openDoc();
     await exportActiveDocument(format);
     const bytes = decode((ipc.calls[1].args as { dataBase64: string }).dataBase64);
     expect(new TextDecoder("latin1").decode(bytes.subarray(0, magic.length))).toBe(magic);
-    expect(toastMock).toHaveBeenCalledWith("Exportando: Página 2 de 2…", expect.anything());
+    if (format === "pdf") expect(progress).toContain("Página 2 de 2…");
+    expect(panelCalls).toHaveLength(1);
   });
 
   it("reports warnings (e.g. omitted images) after a successful export", async () => {

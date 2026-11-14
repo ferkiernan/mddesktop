@@ -5,7 +5,7 @@ import { ask } from "../../ui/dialogs";
 import { toast } from "../../ui/Toast";
 import { useDocuments } from "./store";
 import { pathKey } from "./types";
-import { resolveExternalChange } from "./conflictActions";
+import { confirmReplaceDiskVersion, resolveExternalChange } from "./conflictActions";
 
 const fmtMB = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
 
@@ -80,6 +80,15 @@ async function openOne(path: string): Promise<void> {
 export async function save(id: string): Promise<boolean> {
   const doc = useDocuments.getState().docs[id];
   if (!doc) return false;
+  if (doc.compare) {
+    // spec 008: never save a half-decided comparison
+    await ask({
+      title: "Comparación pendiente",
+      message: `"${doc.fileName}" está en comparación con la versión del disco. Elige "Aceptar cambio" o "Rechazar cambio" antes de guardar.`,
+      buttons: [{ label: "Aceptar", value: "ok", primary: true }],
+    });
+    return false;
+  }
   if (!doc.filePath) return saveAs(id);
   return writeTo(id, doc.filePath, { expected: doc.fingerprint, overwriteExternal: false });
 }
@@ -157,7 +166,9 @@ async function writeTo(
       return choice === "convert" ? writeTo(id, path, opts, true) : false;
     }
     if (err.is("EXTERNAL_CONFLICT") && !opts.overwriteExternal) {
-      // the file changed on disk since we read it: let the user decide (FR-014)
+      // the user already chose to keep the app's version: confirm the replacement (spec 008 FR-004)
+      if (useDocuments.getState().docs[id]?.externalState === "modified") return confirmReplaceDiskVersion(id);
+      // otherwise the file changed since we read it: same dialog as an external change (spec 008)
       return resolveExternalChange(id);
     }
     await showError("No se pudo guardar", err);

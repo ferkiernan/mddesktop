@@ -2,7 +2,7 @@
 // Drives the real export pipeline inside the real WebView2 (viewer + snapshot + rasterizer + writers) for
 // the four formats, saves the files and validates their structure. The OS save dialog is bypassed.
 import { spawn, execSync } from "node:child_process";
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 const exe = process.argv[2] ?? join(process.env.TEMP, "mddesktop-test.exe");
@@ -87,9 +87,10 @@ for (const format of ["html", "pdf", "docx", "odt"]) {
     mkdirSync(dir, { recursive: true });
     // System.IO.Compression: independent reader, also validates our central directory and CRCs
     execSync(`powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::ExtractToDirectory('${file}', '${dir}')"`);
+    // spec 006: native documents (text, styles, numbering); pictures only for images and diagrams
     const files = format === "docx"
-      ? ["[Content_Types].xml", "_rels/.rels", "word/document.xml", "word/_rels/document.xml.rels", "word/media/page1.jpeg"]
-      : ["mimetype", "META-INF/manifest.xml", "content.xml", "styles.xml", "Pictures/page1.jpeg"];
+      ? ["[Content_Types].xml", "_rels/.rels", "word/document.xml", "word/_rels/document.xml.rels", "word/styles.xml", "word/numbering.xml", "word/settings.xml"]
+      : ["mimetype", "META-INF/manifest.xml", "content.xml", "styles.xml", "meta.xml"];
     check(`${format} parts exist`, files.every((f) => existsSync(join(dir, f))));
     const xmls = files.filter((f) => /\.(xml|rels)$/.test(f)).map((f) => [f, readFileSync(join(dir, f), "utf8")]);
     const bad = await evalJs(`(() => { const bad = []; for (const [n, x] of ${JSON.stringify(xmls)}) { const d = new DOMParser().parseFromString(x, "application/xml"); if (d.querySelector("parsererror")) bad.push(n); } return bad; })()`);
@@ -98,17 +99,25 @@ for (const format of ["html", "pdf", "docx", "odt"]) {
       check("odt mimetype first + stored", buf.subarray(30, 38).toString() === "mimetype" && buf.readUInt16LE(8) === 0);
       check("odt mimetype content", readFileSync(join(dir, "mimetype"), "utf8") === "application/vnd.oasis.opendocument.text");
       const content = readFileSync(join(dir, "content.xml"), "utf8");
-      check("odt A4 frames", content.includes('svg:width="210mm"') && content.includes('svg:height="297mm"'));
+      check("odt native: headings, table with header rows, task boxes", content.includes('text:outline-level="1"') && content.includes("<table:table-header-rows>") && content.includes("☑"));
+      check("odt A4 page layout", readFileSync(join(dir, "styles.xml"), "utf8").includes('fo:page-width="210mm"'));
+      const pics = existsSync(join(dir, "Pictures")) ? readdirSync(join(dir, "Pictures")) : [];
+      check("odt pictures = image + diagram only", pics.length === 2, JSON.stringify(pics));
     } else {
       const doc = readFileSync(join(dir, "word/document.xml"), "utf8");
-      check("docx A4 section + full-page anchors", doc.includes('w:w="11906" w:h="16838"') && doc.includes('cx="7560000" cy="10692000"'));
+      check("docx A4 section", doc.includes('w:w="11906" w:h="16838"'));
+      check(
+        "docx native: heading styles, real table with repeated header, task boxes, hyperlink",
+        doc.includes('<w:pStyle w:val="Heading1"/>') && doc.includes("<w:tblHeader/>") && doc.includes("☑") && doc.includes("<w:hyperlink"),
+      );
+      const text = [...doc.matchAll(/<w:t(?: [^>]*)?>([^<]*)<\/w:t>/g)].map((m) => m[1]).join("");
+      check("docx text is the document's text", text.includes("Documento de exportación") && text.includes("Tarea hecha") && text.includes("Columna A"), text.slice(0, 80));
+      const media = existsSync(join(dir, "word/media")) ? readdirSync(join(dir, "word/media")) : [];
+      check("docx pictures = image + diagram only (no page images)", media.length === 2 && !media.some((m) => /^page/.test(m)), JSON.stringify(media));
     }
   }
 }
 
-// page image of the first page (docx) for a visual check
-const jpeg = join(out, "docx-x", "word", "media", "page1.jpeg");
-if (existsSync(jpeg)) { const b = readFileSync(jpeg); check("page image is JPEG 1588x2246", b[0] === 0xff && b[1] === 0xd8); }
 
 const failed = results.filter((x) => !x).length;
 console.log(failed ? `FAIL (${failed})` : "PASS", "-> files in", out);

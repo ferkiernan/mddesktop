@@ -22,6 +22,12 @@ pub struct Preferences {
     pub editor_toolbar_visible: bool,
     /// mdwysiwyg `historyUndo` (Settings menu). On by default (spec 003, owner's decision).
     pub editor_history: bool,
+    /// Style used by File > Export: "screen" (the active style) or a style id (spec 005).
+    pub export_style: String,
+    /// Zoom of the document content only (spec 007): 0.5-3.0 in 5 % steps. Replaces `ui_zoom`.
+    pub content_zoom: f64,
+    /// Size of the tab bar and the editor toolbar (spec 007, set in the Temas panel): 0.75-2.0.
+    pub bar_scale: f64,
 }
 
 impl Default for Preferences {
@@ -37,6 +43,9 @@ impl Default for Preferences {
             editor_style: "default".into(),
             editor_toolbar_visible: true,
             editor_history: true,
+            export_style: "screen".into(),
+            content_zoom: 1.0,
+            bar_scale: 1.0,
         }
     }
 }
@@ -55,6 +64,15 @@ impl Preferences {
         if !ok {
             self.editor_style = "default".into();
         }
+        let ok = !self.export_style.is_empty()
+            && self.export_style.len() <= 32
+            && self.export_style.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+        if !ok {
+            self.export_style = "screen".into();
+        }
+        let step = |v: f64, lo: f64, hi: f64| if v.is_finite() { ((v.clamp(lo, hi)) * 20.0).round() / 20.0 } else { 1.0 };
+        self.content_zoom = step(self.content_zoom, 0.5, 3.0);
+        self.bar_scale = step(self.bar_scale, 0.75, 2.0);
         if self.large_file_warn_bytes == 0 {
             self.large_file_warn_bytes = Preferences::default().large_file_warn_bytes;
         }
@@ -123,7 +141,16 @@ impl AppData {
     }
 
     pub fn load_settings(&self) -> AppResult<Preferences> {
-        Ok(read_json::<Preferences>(&self.settings_path())?.unwrap_or_default().sanitized())
+        let Some(raw) = read_json::<serde_json::Value>(&self.settings_path())? else {
+            return Ok(Preferences::default());
+        };
+        // spec 007: the old whole-window zoom becomes the content zoom the first time
+        let migrate_zoom = raw.get("uiZoom").is_some() && raw.get("contentZoom").is_none();
+        let mut p: Preferences = serde_json::from_value(raw).unwrap_or_default();
+        if migrate_zoom {
+            p.content_zoom = p.ui_zoom;
+        }
+        Ok(p.sanitized())
     }
 
     /// Merges known keys of `patch` into the stored preferences, clamps, and persists.
@@ -254,6 +281,30 @@ mod tests {
         // wrong types are rejected without touching the stored values
         assert!(a.save_settings(&serde_json::json!({ "editorHistory": "yes" })).is_err());
         assert!(!a.load_settings().unwrap().editor_history);
+    }
+
+    #[test]
+    fn export_style_defaults_to_screen_and_is_validated() {
+        let d = tempfile::tempdir().unwrap();
+        let a = AppData::new(d.path());
+        assert_eq!(a.load_settings().unwrap().export_style, "screen");
+        assert_eq!(a.save_settings(&serde_json::json!({ "exportStyle": "dark" })).unwrap().export_style, "dark");
+        assert_eq!(a.save_settings(&serde_json::json!({ "exportStyle": "<x>" })).unwrap().export_style, "screen");
+    }
+
+    #[test]
+    fn content_zoom_and_bar_scale_are_clamped_and_ui_zoom_migrates() {
+        let d = tempfile::tempdir().unwrap();
+        std::fs::write(d.path().join("settings.json"), r#"{"version":1,"uiZoom":1.3}"#).unwrap();
+        let a = AppData::new(d.path());
+        let p = a.load_settings().unwrap();
+        assert_eq!((p.content_zoom, p.bar_scale), (1.3, 1.0));
+        let p = a.save_settings(&serde_json::json!({ "contentZoom": 9.0, "barScale": 0.1 })).unwrap();
+        assert_eq!((p.content_zoom, p.bar_scale), (3.0, 0.75));
+        let p = a.save_settings(&serde_json::json!({ "contentZoom": 1.0499 })).unwrap();
+        assert_eq!(p.content_zoom, 1.05);
+        // once contentZoom exists, uiZoom is ignored
+        assert_eq!(a.load_settings().unwrap().content_zoom, 1.05);
     }
 
     #[test]

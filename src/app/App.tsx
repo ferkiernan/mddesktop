@@ -5,6 +5,9 @@ import { EditorHost } from "../features/editor/EditorHost";
 import { StatusBar } from "../ui/StatusBar";
 import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
+import { ExportPanelHost } from "../features/export/ExportPanelHost";
+import { ThemesPanelHost } from "../features/themes/ThemesPanelHost";
+import { useStyleCatalog } from "../features/themes/catalog";
 import { runMenuAction, startMenuBridge } from "./menuBridge";
 import { startShortcuts } from "../features/shortcuts/manager";
 import { events } from "../services/events";
@@ -14,6 +17,7 @@ import { requestClose, requestExit } from "../features/documents/closeFlow";
 import { startExternalChangeWatcher } from "../features/documents/externalChanges";
 import { startOpenFilesHandler } from "../features/documents/openFilesHandler";
 import { startReloadUndo } from "../features/editor/reloadUndo";
+import { startWheelZoom } from "../features/settings/zoom";
 import { useSettings } from "../features/settings/store";
 import { useDocuments } from "../features/documents/store";
 import { restoreSession } from "../features/session/restore";
@@ -53,7 +57,7 @@ function useAppLifecycle() {
       };
     }
     let cancelled = false;
-    const stops: (() => void)[] = [startMenuBridge(), startReloadUndo(), startShortcuts(runMenuAction)];
+    const stops: (() => void)[] = [startMenuBridge(), startReloadUndo(), startShortcuts(runMenuAction), startWheelZoom()];
 
     let unlistenClose: (() => void) | undefined;
     events
@@ -66,6 +70,7 @@ function useAppLifecycle() {
     stops.push(() => unlistenClose?.());
 
     void (async () => {
+      await useStyleCatalog.getState().load(); // custom styles first: the saved active style may be one of them
       await useSettings.getState().load();
       await restoreSession();
       if (cancelled) return;
@@ -94,6 +99,8 @@ export default function App() {
         <main className="app-main">{spikeEnabled ? <SpikeEditors /> : <EditorHost />}</main>
         {statusBarVisible && <StatusBar />}
         <ToastHost />
+        <ExportPanelHost />
+        <ThemesPanelHost />
         <DialogHost />
       </div>
     </ErrorBoundary>

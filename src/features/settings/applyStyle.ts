@@ -7,8 +7,21 @@ export const EDITOR_CLASS = "mdd-editor";
 export const DEFAULT_STYLE_ID = "default";
 const STYLE_EL_ID = "mdd-editor-styles";
 
+/** The user's own styles (spec 004), registered by the style catalogue. */
+let customStyles: EditorStyle[] = [];
+
+/** Built-in plus custom styles. */
+export const allStyles = (): EditorStyle[] => [...EDITOR_STYLES, ...customStyles];
+
 export const findStyle = (id: string): EditorStyle =>
-  EDITOR_STYLES.find((s) => s.id === id) ?? EDITOR_STYLES.find((s) => s.id === DEFAULT_STYLE_ID)!;
+  allStyles().find((s) => s.id === id) ?? EDITOR_STYLES.find((s) => s.id === DEFAULT_STYLE_ID)!;
+
+/** Replaces the custom styles and refreshes the scoped stylesheet. */
+export function registerCustomStyles(list: EditorStyle[]) {
+  customStyles = list;
+  const el = document.getElementById(STYLE_EL_ID);
+  if (el) el.textContent = allStyles().map(styleCss).join("\n\n");
+}
 
 export function styleCss(style: EditorStyle): string {
   const decls = Object.entries(style.vars)
@@ -65,7 +78,7 @@ function ensureStyleElement(): HTMLStyleElement {
   if (!el) {
     el = document.createElement("style");
     el.id = STYLE_EL_ID;
-    el.textContent = EDITOR_STYLES.map(styleCss).join("\n\n");
+    el.textContent = allStyles().map(styleCss).join("\n\n");
     document.head.appendChild(el);
   }
   return el;

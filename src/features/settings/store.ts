@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Preferences } from "../../services/contracts";
 import { app, settings } from "../../services/ipc";
 import { applyEditorStyle } from "./applyStyle";
+import { applyZoom } from "./zoom";
 
 export const DEFAULT_PREFS: Preferences = {
   version: 1,
@@ -14,6 +15,9 @@ export const DEFAULT_PREFS: Preferences = {
   editorStyle: "default",
   editorToolbarVisible: true,
   editorHistory: true,
+  exportStyle: "screen",
+  contentZoom: 1,
+  barScale: 1,
 };
 
 interface SettingsState {
@@ -23,10 +27,10 @@ interface SettingsState {
   update(patch: Partial<Preferences>): Promise<void>;
 }
 
-/** Applies theme and zoom to the document (CSS variables + `zoom`). */
+/** Applies the style, the content zoom and the bar size (spec 007: no whole-window zoom any more). */
 export function applyAppearance(p: Preferences) {
   const style = applyEditorStyle(p.editorStyle);
-  document.documentElement.style.setProperty("zoom", String(p.uiZoom));
+  applyZoom(p.contentZoom, p.barScale);
   app.setStyleMenu(style.id).catch(() => undefined); // keep the native check mark in sync (no-op outside Tauri)
   app.setViewMenu(p.editorToolbarVisible, p.editorHistory).catch(() => undefined);
 }

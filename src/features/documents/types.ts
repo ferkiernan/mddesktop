@@ -1,4 +1,4 @@
-import type { Eol, FileFingerprint } from "../../services/contracts";
+import type { Eol, FileFingerprint, ReadResult } from "../../services/contracts";
 
 export interface EditorDocument {
   id: string;
@@ -23,6 +23,13 @@ export interface EditorDocument {
    * non-edit emission and treat it as "not modified" (also after undoing back to it).
    */
   canonical: string | null;
+  /**
+   * Spec 008: the file changed on disk and the user chose "Comparar". The editor shows the app's content
+   * (original, read-only) next to this disk version (new, editable) until the user accepts or rejects.
+   */
+  compare?: ReadResult | null;
+  /** Hash of a disk version the user chose to ignore (no new dialog for that same version). */
+  ignoredHash?: string | null;
 }
 
 export function fileNameOf(path: string): string {

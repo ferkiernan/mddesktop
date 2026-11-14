@@ -26,6 +26,18 @@ interface DocumentsState {
   reloadFromDisk(id: string, r: ReadResult): void;
   /** Ctrl+Z fallback: puts back the pre-reload content. Returns false when there is nothing to restore. */
   restoreSnapshot(id: string): boolean;
+  /** Spec 008: enters compare mode with the disk version as the proposed content. */
+  startCompare(id: string, disk: ReadResult): void;
+  /** The disk changed again during a comparison: restart it with the latest disk version (remounts the editor). */
+  restartCompare(id: string, disk: ReadResult): void;
+  /** "Aceptar cambio": keeps the new pane; clean when it equals the disk version. Ctrl+Z restores the previous content. */
+  acceptCompare(id: string, markdown: string): void;
+  /** "Rechazar cambio": keeps the app's content; the next save asks before replacing the disk version. */
+  rejectCompare(id: string): void;
+  /** "Ignorar cambios": remembers the disk version so the same change is not asked again. */
+  ignoreDiskVersion(id: string, hash: string): void;
+  /** The disk now holds exactly this document's content (e.g. another program saved the same text). */
+  syncWithDisk(id: string, r: ReadResult): void;
 }
 
 const dirty = (content: string, saved: string, canonical: string | null = null) =>
@@ -168,6 +180,80 @@ export const useDocuments = create<DocumentsState>((set, get) => ({
         revision: d.revision + 1,
         reloadSnapshot: d.content,
         canonical: null,
+      };
+      return { docs: { ...s.docs, [id]: next } };
+    });
+  },
+
+  startCompare(id, disk) {
+    set((s) => (s.docs[id] ? { docs: { ...s.docs, [id]: { ...s.docs[id], compare: disk } }, activeId: id } : s));
+  },
+
+  restartCompare(id, disk) {
+    set((s) => {
+      const d = s.docs[id];
+      return d ? { docs: { ...s.docs, [id]: { ...d, compare: disk, revision: d.revision + 1 } } } : s;
+    });
+  },
+
+  acceptCompare(id, markdown) {
+    set((s) => {
+      const d = s.docs[id];
+      const disk = d?.compare;
+      if (!d || !disk) return s;
+      const content = markdown.replace(/\r\n/g, "\n");
+      const next: EditorDocument = {
+        ...d,
+        content,
+        savedContent: disk.content,
+        isDirty: dirty(content, disk.content, null),
+        fingerprint: disk.fingerprint,
+        lastModified: disk.fingerprint.mtimeMs,
+        encoding: disk.encoding,
+        bom: disk.bom,
+        eol: disk.eol,
+        externalState: "none",
+        reloadSnapshot: d.content, // Ctrl+Z puts back what the app had (FR-007)
+        canonical: null,
+        compare: null,
+        ignoredHash: null,
+      };
+      return { docs: { ...s.docs, [id]: next } };
+    });
+  },
+
+  rejectCompare(id) {
+    set((s) => {
+      const d = s.docs[id];
+      if (!d?.compare) return s;
+      const next: EditorDocument = {
+        ...d,
+        externalState: "modified",
+        ignoredHash: d.compare.fingerprint.hash,
+        isDirty: true, // differs from the disk version from now on
+        compare: null,
+      };
+      return { docs: { ...s.docs, [id]: next } };
+    });
+  },
+
+  ignoreDiskVersion(id, hash) {
+    set((s) => (s.docs[id] ? { docs: { ...s.docs, [id]: { ...s.docs[id], externalState: "modified", ignoredHash: hash } } } : s));
+  },
+
+  syncWithDisk(id, r) {
+    set((s) => {
+      const d = s.docs[id];
+      if (!d) return s;
+      const next: EditorDocument = {
+        ...d,
+        savedContent: r.content,
+        isDirty: false,
+        fingerprint: r.fingerprint,
+        lastModified: r.fingerprint.mtimeMs,
+        externalState: "none",
+        canonical: null,
+        ignoredHash: null,
       };
       return { docs: { ...s.docs, [id]: next } };
     });

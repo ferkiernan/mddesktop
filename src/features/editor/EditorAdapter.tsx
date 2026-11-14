@@ -3,6 +3,7 @@ import { memo, Suspense, useEffect, useMemo, useRef } from "react";
 import type { MarkdownEditorHandle } from "mdwysiwyg";
 import { EDITOR_CLASS } from "../settings/applyStyle";
 import { useSettings } from "../settings/store";
+import { useDocuments } from "../documents/store";
 import { makeImageResolver } from "../images/resolveSrc";
 import { registerEditor } from "./handles";
 import { LazyMarkdownEditor } from "./lazy";
@@ -28,6 +29,12 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange, onN
   // editor options (spec 003): toggling them never remounts the editor nor fires onChange
   const showToolbar = useSettings((s) => s.prefs.editorToolbarVisible);
   const historyUndo = useSettings((s) => s.prefs.editorHistory);
+  // spec 008: external change being compared (app content = original, disk version = proposal)
+  const compare = useDocuments((s) => s.docs[documentId]?.compare ?? null);
+  const comparing = useRef(false);
+  useEffect(() => {
+    comparing.current = !!compare;
+  }, [compare]);
 
   // Interactions that can change content open a short window in which onChange counts as an edit.
   useEffect(() => {
@@ -83,6 +90,7 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange, onN
           documentId={documentId}
           initialContent={initialContent}
           onChange={(md) => {
+            if (comparing.current) return; // the decision handler below owns the content while comparing
             const text = md.replace(/\r\n/g, "\n");
             if (tracker.isEdit()) onChange(text);
             else onNormalized?.(text);
@@ -94,6 +102,20 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange, onN
           resolveImageSrc={resolveImageSrc}
           showToolbar={showToolbar}
           historyUndo={historyUndo}
+          {...(compare
+            ? {
+                mode: "compare" as const,
+                compareContent: compare.content,
+                compareOrientation: "side-to-side" as const,
+                compareSyncScroll: true,
+                onCompareDecision: ({ decision, markdown }: { decision: "accepted" | "rejected"; markdown: string }) => {
+                  comparing.current = true; // keep ignoring the onChange that comes with the decision
+                  const docs = useDocuments.getState();
+                  if (decision === "accepted") docs.acceptCompare(documentId, markdown);
+                  else docs.rejectCompare(documentId);
+                },
+              }
+            : {})}
         />
       </Suspense>
     </div>

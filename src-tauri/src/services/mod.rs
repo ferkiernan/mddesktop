@@ -1,5 +1,6 @@
 pub mod app_data;
 pub mod authz;
+pub mod custom_styles;
 pub mod dialog_service;
 pub mod encoding;
 pub mod fs_service;

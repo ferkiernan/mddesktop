@@ -35,6 +35,16 @@ async function setup(page: Page, format: string, style = "default") {
   await page.locator(".editor-slot:not([hidden]) .ProseMirror").waitFor();
 }
 
+/** Spec 005: File > Export opens the export panel first; the preview is built and "Exportar…" continues. */
+async function exportVia(page: Page, id: string) {
+  await menu(page, id);
+  const panel = page.getByRole("dialog", { name: /^Exportar:/ });
+  await expect(panel).toBeVisible();
+  const go = panel.getByRole("button", { name: "Exportar…" });
+  await expect(go).toBeEnabled({ timeout: 30_000 });
+  await go.click();
+}
+
 const written = async (page: Page) => {
   await expect.poll(async () => (await calls(page, "write_export")).length, { timeout: 30_000 }).toBe(1);
   const [req] = (await calls(page, "write_export")) as { path: string; dataBase64: string }[];
@@ -43,7 +53,7 @@ const written = async (page: Page) => {
 
 test("Archivo > Exportar > HTML writes a self-contained A4 page with the active style", async ({ page }) => {
   await setup(page, "html", "winamp");
-  await menu(page, "export.html");
+  await exportVia(page, "export.html");
   const { path, bytes } = await written(page);
   const html = bytes.toString("utf8");
   expect(path).toBe("C:\\out\\informe.html");
@@ -58,7 +68,7 @@ test("Archivo > Exportar > HTML writes a self-contained A4 page with the active 
 
 test("PDF has A4 pages that contain the rendered document", async ({ page }) => {
   await setup(page, "pdf");
-  await menu(page, "export.pdf");
+  await exportVia(page, "export.pdf");
   const { bytes } = await written(page);
   const s = bytes.toString("latin1");
   expect(s.startsWith("%PDF-1.4")).toBe(true);
@@ -67,13 +77,18 @@ test("PDF has A4 pages that contain the rendered document", async ({ page }) => 
   expect(s).toContain("/DCTDecode");
 });
 
-test("Word and OpenDocument are zip packages with A4 pages", async ({ page }) => {
+test("Word is a native document: real headings, table and text (spec 006)", async ({ page }) => {
   await setup(page, "docx");
-  await menu(page, "export.docx");
+  await exportVia(page, "export.docx");
   const docx = (await written(page)).bytes;
   expect(docx.subarray(0, 4).toString("hex")).toBe("504b0304");
   expect(docx.toString("latin1")).toContain("word/document.xml");
   expect(docx.toString("latin1")).toContain('w:w="11906" w:h="16838"');
+  const xml = docx.toString("utf8");
+  expect(xml).toContain('<w:pStyle w:val="Heading1"/>');
+  expect(xml).toContain("<w:tblHeader/>");
+  expect(xml).toContain(">Informe<");
+  expect(xml).not.toContain("word/media/page1.jpeg"); // no page images any more
 });
 
 test("cancelling the save dialog writes nothing and shows no error", async ({ page }) => {
@@ -81,7 +96,7 @@ test("cancelling the save dialog writes nothing and shows no error", async ({ pa
   await page.evaluate(() => {
     (window as unknown as { __responses: Record<string, unknown> }).__responses.pick_export_path = null;
   });
-  await menu(page, "export.pdf");
+  await exportVia(page, "export.pdf");
   await page.waitForTimeout(800);
   expect(await calls(page, "write_export")).toHaveLength(0);
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -94,8 +109,36 @@ test("a failing write shows the reason", async ({ page }) => {
       __reject: { code: "PERMISSION_DENIED", message: "acceso denegado" },
     };
   });
-  await menu(page, "export.pdf");
+  await exportVia(page, "export.pdf");
   const dialog = page.getByRole("dialog", { name: "No se pudo exportar" });
   await expect(dialog).toBeVisible({ timeout: 30_000 });
   await expect(dialog).toContainText("acceso denegado");
+});
+
+test("export panel: 'Como en pantalla' is preselected, another style does not touch the editor, Cancelar writes nothing (spec 005)", async ({ page }) => {
+  await setup(page, "html", "dark");
+  await menu(page, "export.html");
+  const panel = page.getByRole("dialog", { name: /^Exportar:/ });
+  await expect(panel.getByRole("radio", { name: "Como en pantalla" })).toBeChecked();
+  await panel.getByRole("radio", { name: "Default" }).check();
+  await expect(panel.getByRole("button", { name: "Exportar…" })).toBeEnabled({ timeout: 30_000 });
+  expect(await page.evaluate(() => document.documentElement.dataset.editorStyle)).toBe("dark");
+  await panel.getByRole("button", { name: "Cancelar" }).click();
+  await expect(panel).toHaveCount(0);
+  expect(await calls(page, "pick_export_path")).toHaveLength(0);
+  expect(await calls(page, "write_export")).toHaveLength(0);
+});
+
+test("exporting with another style uses it and remembers it (spec 005)", async ({ page }) => {
+  await setup(page, "html", "dark");
+  await menu(page, "export.html");
+  const panel = page.getByRole("dialog", { name: /^Exportar:/ });
+  await panel.getByRole("radio", { name: "Default" }).check();
+  const go = panel.getByRole("button", { name: "Exportar…" });
+  await expect(go).toBeEnabled({ timeout: 30_000 });
+  await go.click();
+  const html = (await written(page)).bytes.toString("utf8");
+  expect(html).toContain("rgb(255, 255, 255)"); // Default background, not Dark's
+  expect(html).not.toContain("rgb(11, 18, 32)");
+  expect((await calls(page, "settings_save")).some((c) => (c as { patch?: { exportStyle?: string } }).patch?.exportStyle === "default")).toBe(true);
 });

@@ -18,6 +18,9 @@ import {
   type Session,
   type WriteRequest,
   type FileFingerprint,
+  CustomStyleSchema,
+  LoadedStylesSchema,
+  type CustomStyle,
 } from "./contracts";
 import { toAppError } from "./errors";
 
@@ -70,11 +73,17 @@ export const settings = {
   save: (patch: Partial<Preferences>) => call<Preferences>("settings_save", PreferencesSchema, { patch }),
 };
 
+export const stylesIpc = {
+  load: () => call("styles_load", LoadedStylesSchema),
+  save: (styles: CustomStyle[]) => call("styles_save", z.array(CustomStyleSchema), { styles: styles.map((s) => CustomStyleSchema.parse(s)) }),
+};
+
 export const app = {
   confirmExit: () => call("confirm_exit", Void),
   getLaunchFiles: () => call("get_launch_files", Paths),
   setStyleMenu: (style: string) => call("set_style_menu", Void, { style }),
   setViewMenu: (toolbar: boolean, history: boolean) => call("set_view_menu", Void, { toolbar, history }),
+  setCustomStylesMenu: (items: [string, string][], active: string) => call("set_custom_styles_menu", Void, { items, active }),
 };
 
 export const images = {

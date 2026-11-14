@@ -71,8 +71,29 @@ export const PreferencesSchema = z.object({
   editorStyle: z.string().min(1).max(32),
   editorToolbarVisible: z.boolean(),
   editorHistory: z.boolean(),
+  exportStyle: z.string().min(1).max(32),
+  contentZoom: z.number().min(0.5).max(3),
+  barScale: z.number().min(0.75).max(2),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
+
+/** A user-defined editor style (spec 004); mirrors Rust `custom_styles::CustomStyle`. */
+const CssValue = z
+  .string()
+  .min(1)
+  .max(240)
+  .regex(/^[\w #(),.%'"+-]+$/)
+  .refine((v) => !/url\(|expression/i.test(v));
+export const CustomStyleSchema = z.object({
+  id: z.string().regex(/^custom-[a-z0-9-]{1,25}$/),
+  label: z.string().trim().min(1).max(40),
+  base: z.record(z.string(), CssValue),
+  overrides: z.record(z.string().regex(/^--md[wd]-[a-z0-9-]{1,42}$/), CssValue),
+  createdAt: z.number().int().nonnegative(),
+  updatedAt: z.number().int().nonnegative(),
+});
+export type CustomStyle = z.infer<typeof CustomStyleSchema>;
+export const LoadedStylesSchema = z.object({ styles: z.array(CustomStyleSchema), recovered: z.boolean() });
 
 export const SessionTabSchema = z.object({
   documentId: z.string(),
@@ -140,6 +161,7 @@ const BaseMenuActionIdSchema = z.enum([
   "view.toggleStatusBar",
   "view.toggleToolbar",
   "settings.toggleHistory",
+  "settings.themes",
   "tab.next",
   "tab.prev",
 ]);

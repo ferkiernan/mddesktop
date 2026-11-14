@@ -83,6 +83,9 @@ export function runMenuAction(id: MenuActionId) {
     case "view.toggleToolbar":
       void toggleEditorToolbar();
       return;
+    case "settings.themes":
+      void import("../features/themes/themesPanelStore").then((m) => m.openThemesPanel());
+      return;
     case "settings.toggleHistory":
       void toggleEditorHistory();
       return;

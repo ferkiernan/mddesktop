@@ -9,6 +9,8 @@ import { makeImageResolver } from "../images/resolveSrc";
 import { CONTENT_WIDTH_PX } from "./constants";
 
 const MAX_WAIT_MS = 15_000;
+/** Class of the hidden viewer when an explicit export style is used (no active-style rule matches it). */
+export const EXPORT_EDITOR_CLASS = "mdd-export-editor";
 const QUIET_MS = 350;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -54,10 +56,15 @@ export async function withViewer<T>(
   markdown: string,
   fn: (v: ViewerHandle) => Promise<T>,
   documentId?: string,
+  /** Export style (spec 005): its variables are declared on the host and the active style's class is not used. */
+  styleVars?: Record<string, string>,
 ): Promise<T> {
   const host = document.createElement("div");
   host.setAttribute("aria-hidden", "true");
   host.style.cssText = `position:fixed;left:-20000px;top:0;width:${CONTENT_WIDTH_PX + 80}px;height:auto;overflow:visible;pointer-events:none;`;
+  for (const [k, v] of Object.entries(styleVars ?? {})) host.style.setProperty(k, v);
+  // the on-screen content zoom (spec 007) and toolbar scale never reach an export
+  host.style.setProperty("--mdw-content-zoom", "1");
   document.body.appendChild(host);
   const root = createRoot(host);
   try {
@@ -68,7 +75,7 @@ export async function withViewer<T>(
         resizable: false,
         width: "100%",
         height: "auto",
-        className: EDITOR_CLASS,
+        className: styleVars ? EXPORT_EDITOR_CLASS : EDITOR_CLASS,
         // relative image paths resolve against the document (upstream resolveImageSrc, see EditorAdapter)
         ...(documentId ? { resolveImageSrc: makeImageResolver(documentId) } : {}),
       }),

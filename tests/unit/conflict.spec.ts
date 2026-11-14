@@ -35,31 +35,80 @@ beforeEach(() => {
 });
 afterEach(() => ipc?.restore());
 
-describe("external change resolution (FR-014)", () => {
-  it("option 1 - overwrite: force-saves local content", async () => {
-    ipc = installMockIpc({ write_document: () => ({ fingerprint: fp(3) }) });
-    const id = openDirty();
-    askMock.mockResolvedValue("overwrite");
-    expect(await resolveExternalChange(id)).toBe(true);
-    const req = ipc.calls[0].args?.request as { overwriteExternal: boolean; content: string };
-    expect([req.overwriteExternal, req.content]).toEqual([true, "mis cambios\n"]);
-    expect(useDocuments.getState().docs[id].isDirty).toBe(false);
-  });
-
-  it("option 2 - new tab: disk version opens as an untitled doc, original untouched", async () => {
+describe("external change resolution (spec 008, replaces 001 FR-014)", () => {
+  it("one dialog with Ignorar cambios (Escape) / Abrir de nuevo / Comparar (primary), with or without local changes", async () => {
     ipc = installMockIpc({ read_document: () => disk("del disco\n") });
     const id = openDirty();
-    askMock.mockResolvedValue("newtab");
+    askMock.mockResolvedValue("ignore");
     await resolveExternalChange(id);
-    const { docs, order } = useDocuments.getState();
-    expect(order).toHaveLength(2);
-    const created = docs[order[1]];
-    expect([created.filePath, created.content]).toEqual([null, "del disco\n"]);
-    expect(docs[id].content).toBe("mis cambios\n");
-    expect(docs[id].isDirty).toBe(true);
+    const opts = askMock.mock.calls[0][0];
+    expect(opts.buttons.map((b: { value: string }) => b.value)).toEqual(["ignore", "reload", "compare"]);
+    expect(opts.buttons[2].primary).toBe(true);
+    expect(opts.message).toMatch(/cambios sin guardar/);
+    const d = useDocuments.getState().docs[id];
+    expect([d.content, d.externalState, d.ignoredHash]).toEqual(["mis cambios\n", "modified", "h2"]);
   });
 
-  it("option 3 - reload here: replaces content, remounts and keeps an undo snapshot", async () => {
+  it("Comparar keeps the app content and stores the disk version as the proposal; nothing is written", async () => {
+    ipc = installMockIpc({ read_document: () => disk("del disco\n") });
+    const id = openDirty();
+    askMock.mockResolvedValue("compare");
+    await resolveExternalChange(id);
+    const d = useDocuments.getState().docs[id];
+    expect([d.content, d.compare?.content]).toEqual(["mis cambios\n", "del disco\n"]);
+    expect(ipc.calls.some((c) => c.cmd === "write_document")).toBe(false);
+  });
+
+  it("accepting the disk version unchanged leaves the document clean; accepting edits leaves it modified; Ctrl+Z data kept", () => {
+    const id = openDirty();
+    useDocuments.getState().startCompare(id, disk("del disco\n") as never);
+    useDocuments.getState().acceptCompare(id, "del disco\n");
+    let d = useDocuments.getState().docs[id];
+    expect([d.content, d.isDirty, d.compare ?? null, d.reloadSnapshot, d.fingerprint?.hash]).toEqual(["del disco\n", false, null, "mis cambios\n", "h2"]);
+    useDocuments.getState().startCompare(id, disk("v3\n", 3) as never);
+    useDocuments.getState().acceptCompare(id, "v3 retocado\n");
+    d = useDocuments.getState().docs[id];
+    expect([d.content, d.isDirty]).toEqual(["v3 retocado\n", true]);
+  });
+
+  it("rejecting keeps the app content and the next save asks before replacing the disk version", async () => {
+    ipc = installMockIpc({ write_document: () => Promise.reject({ code: "EXTERNAL_CONFLICT", message: "changed" }) });
+    const id = openDirty();
+    useDocuments.getState().startCompare(id, disk("del disco\n") as never);
+    useDocuments.getState().rejectCompare(id);
+    expect(useDocuments.getState().docs[id].content).toBe("mis cambios\n");
+    askMock.mockResolvedValue("cancel");
+    expect(await save(id)).toBe(false);
+    expect(askMock.mock.calls[0][0].title).toMatch(/Reemplazar/);
+  });
+
+  it("saving during a comparison asks to decide first and writes nothing", async () => {
+    ipc = installMockIpc({ write_document: () => ({ fingerprint: fp(9) }) });
+    const id = openDirty();
+    useDocuments.getState().startCompare(id, disk("del disco\n") as never);
+    askMock.mockResolvedValue("ok");
+    expect(await save(id)).toBe(false);
+    expect(askMock.mock.calls[0][0].title).toMatch(/Comparación pendiente/);
+    expect(ipc.calls.some((c) => c.cmd === "write_document")).toBe(false);
+  });
+
+  it("no dialog when the disk now has exactly the app content", async () => {
+    ipc = installMockIpc({ read_document: () => disk("mis cambios\n", 4) });
+    const id = openDirty();
+    await resolveExternalChange(id);
+    expect(askMock).not.toHaveBeenCalled();
+    const d = useDocuments.getState().docs[id];
+    expect([d.isDirty, d.fingerprint?.hash]).toEqual([false, "h4"]);
+  });
+
+  it("an ignored disk version is not asked again", async () => {
+    const id = useDocuments.getState().addOpened(disk("x\n", 1) as never);
+    useDocuments.getState().ignoreDiskVersion(id, "h7");
+    await handleExternalChange({ path: "C:\\a.md", kind: "modified", fingerprint: fp(7) });
+    expect(askMock).not.toHaveBeenCalled();
+  });
+
+  it("Abrir de nuevo: replaces content, remounts and keeps an undo snapshot", async () => {
     ipc = installMockIpc({ read_document: () => disk("del disco\n") });
     const id = openDirty();
     askMock.mockResolvedValue("reload");
@@ -89,29 +138,11 @@ describe("external change resolution (FR-014)", () => {
     expect(useDocuments.getState().docs[id].reloadSnapshot).toBeNull();
   });
 
-  it("a clean document is only offered a reload; Ignorar keeps it flagged", async () => {
-    const id = useDocuments.getState().addOpened(disk("original\n", 1) as never);
-    askMock.mockResolvedValue("ignore");
-    await resolveExternalChange(id);
-    expect(useDocuments.getState().docs[id].externalState).toBe("modified");
-    expect(askMock.mock.calls[0][0].buttons.map((b: { value: string }) => b.value)).toEqual(["ignore", "reload"]);
-  });
-
   it("removed files are flagged without prompting", async () => {
     const id = useDocuments.getState().addOpened(disk("x\n", 1) as never);
     await resolveExternalChange(id, true);
     expect(useDocuments.getState().docs[id].externalState).toBe("removed");
     expect(askMock).not.toHaveBeenCalled();
-  });
-
-  it("saving a stale file routes EXTERNAL_CONFLICT to the conflict dialog", async () => {
-    ipc = installMockIpc({
-      write_document: () => Promise.reject({ code: "EXTERNAL_CONFLICT", message: "changed" }),
-    });
-    const id = openDirty();
-    askMock.mockResolvedValue("cancel");
-    expect(await save(id)).toBe(false);
-    expect(askMock.mock.calls[0][0].title).toMatch(/Conflicto/);
   });
 
   it("does not prompt twice for the same disk state", async () => {

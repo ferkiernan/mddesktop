@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod error;
+pub mod platform;
 pub mod services;
 pub mod state;
 
@@ -54,6 +55,9 @@ pub fn run() {
             commands::session::recovery_list,
             commands::session::recovery_delete,
             commands::session::settings_load,
+            commands::session::styles_load,
+            commands::session::styles_save,
+            commands::app::set_custom_styles_menu,
             commands::session::settings_save,
             commands::images::pick_image,
             commands::images::import_image,

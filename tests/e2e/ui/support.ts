@@ -4,7 +4,7 @@ export const FP = { mtimeMs: 1, size: 3, hash: "h1" };
 export const PREFS = {
   version: 1, theme: "light", uiZoom: 1, statusBarVisible: true,
   lastDirectory: null, editorPoolSize: 3, largeFileWarnBytes: 262144, editorStyle: "default",
-  editorToolbarVisible: true, editorHistory: true,
+  editorToolbarVisible: true, editorHistory: true, exportStyle: "screen", contentZoom: 1, barScale: 1,
 };
 
 export type Responses = Record<string, unknown>;
@@ -43,6 +43,8 @@ export async function installTauri(page: Page, responses: Responses) {
         if (cmd.startsWith("plugin:event|")) return null;
         const r = (w.__responses as Record<string, unknown>)[cmd];
         if (r && typeof r === "object" && "__reject" in (r as object)) throw (r as { __reject: unknown }).__reject;
+        // { __echoArg: "name" } answers with that argument (e.g. commands that store and return a list)
+        if (r && typeof r === "object" && "__echoArg" in (r as object)) return args[(r as { __echoArg: string }).__echoArg];
         return r === undefined ? null : r;
       },
     };

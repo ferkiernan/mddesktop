@@ -40,6 +40,11 @@ export function Tab({ doc, active, dropBefore, dragging, register, handlers, onA
       {...handlers}
     >
       <span className="tab-name">{doc.fileName}</span>
+      {doc.compare && (
+        <span className="tab-compare" role="img" aria-label="Comparación pendiente" title="Comparación pendiente con la versión del disco">
+          ⇄
+        </span>
+      )}
       {doc.isDirty && (
         <span className="tab-dirty" role="img" aria-label="Cambios sin guardar">
           ●

@@ -42,14 +42,14 @@ describe("A4 pagination in block boundaries", () => {
   const blocks = (...pairs: [number, number][]): Block[] => pairs.map(([top, bottom]) => ({ top, bottom }));
 
   it("a short document is one page of exactly its height", () => {
-    expect(paginate(blocks([0, 100], [120, 300]), 300, 1009)).toEqual([{ index: 0, top: 0, height: 300 }]);
+    expect(paginate(blocks([0, 100], [120, 300]), 300, 1009)).toMatchObject([{ index: 0, top: 0, height: 300 }]);
   });
 
   it("never splits a block that fits: the cut moves to the previous boundary", () => {
     const s = paginate(blocks([0, 400], [420, 900], [920, 1300]), 1300, 1009);
     expect(s).toHaveLength(2);
     expect(s[0].height).toBe(900); // the 920-1300 block crosses 1009 and goes entirely to page 2
-    expect(s[1]).toEqual({ index: 1, top: 900, height: 400 });
+    expect(s[1]).toMatchObject({ index: 1, top: 900, height: 400 });
   });
 
   it("a block taller than a page is cut at the page limit", () => {

@@ -18,7 +18,7 @@ export function matchShortcut(e: KeyLike, mac = isMac()): MenuActionId | null {
   if (!mod || e.altKey) return null;
   const k = e.key.toLowerCase();
   if (k === "tab") return e.shiftKey ? "tab.prev" : "tab.next";
-  if (e.shiftKey) return k === "s" ? "file.saveAs" : null;
+  if (e.shiftKey) return k === "s" ? "file.saveAs" : k === "+" ? "view.zoomIn" : null; // Ctrl+Shift+= on US layouts
   switch (k) {
     case "n":
       return "file.new";
