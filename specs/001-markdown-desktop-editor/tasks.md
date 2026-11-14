@@ -73,7 +73,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T029 [P] S5: ejecutar Playwright contra el WebView2 real vía CDP (`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`) con una prueba mínima en `tests/e2e/native/smoke.spec.ts`; alternativa `tauri-driver`
 - [x] T030 [P] S6: probar reordenado por Pointer Events y comprobar si el DnD HTML5 interno funciona con el arrastre de archivos activo, en `tests/e2e/ui/dnd-spike.spec.ts`
 - [x] T031 Puerta de calidad: consolidar S1–S6 en `docs/spikes.md` con decisión explícita (pool, menú, E2E, DnD); si S1 incumple el presupuesto de RAM, detener y decidir antes de continuar — resuelta: S1 medido (ver docs/spikes.md); S2–S6 pasan a sus historias
-- [ ] T032 [P] Registrar en `docs/upstream-requests.md` y abrir issues en `ferkiernan/mdwysiwyg` para U1 (`setMarkdown` deshacible), U2 (`insertMarkdown`), U3 (`resolveImageSrc`) y U4 (estado de vista) con los contratos de editor-adapter.md
+- [X] T032 [P] Registrar en `docs/upstream-requests.md` y abrir issues en `ferkiernan/mdwysiwyg` para U1 (`setMarkdown` deshacible), U2 (`insertMarkdown`), U3 (`resolveImageSrc`) y U4 (estado de vista) con los contratos de editor-adapter.md
 
 **Checkpoint**: base lista; las historias pueden empezar.
 
@@ -89,7 +89,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 
 - [x] T033 [P] [US1] Tests de comandos de documentos (CRLF→LF, `TOO_LARGE`, `ENCODING_UNDETECTABLE`, conflicto, conversión de codificación, no-op) en `src-tauri/tests/documents_commands.rs`
 - [x] T034 [P] [US1] Tests del store (nuevo, abrir con deduplicación por ruta, `isDirty` derivado, guardar actualiza `savedContent`, Guardar como sobre ruta abierta) en `tests/unit/documents-store.spec.ts`
-- [ ] T035 [P] [US1] Test de contrato del adaptador (montaje, `onChange`, alternar vistas sin disparar cambios) en `tests/components/editor-adapter.spec.tsx`
+- [X] T035 [P] [US1] Test de contrato del adaptador (montaje, `onChange`, alternar vistas sin disparar cambios) en `tests/components/editor-adapter.spec.tsx`
 - [x] T036 [P] [US1] E2E de UI abrir → editar → guardar y Guardar como de documento nuevo en `tests/e2e/ui/open-edit-save.spec.ts`
 
 ### Implementación
@@ -211,7 +211,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T089 [US5] Arrastre de archivos manejado en Rust (`DragDrop`), filtrar `.md/.markdown`, autorizar y emitir `app://open-files`/`app://rejected-files` en `src-tauri/src/services/lifecycle.rs`
 - [x] T090 [US5] `fileAssociations` para `.md` y `.markdown` y bundle NSIS (`embedBootstrapper`) en `src-tauri/tauri.conf.json`
 - [x] T091 [US5] Manejador frontend de `app://open-files` y aviso de rechazados en `src/features/documents/openFilesHandler.ts`
-- [ ] T092 [P] [US5] Código específico de plataforma aislado en `src-tauri/src/platform/windows.rs` (y `mod.rs`)
+- [X] T092 [P] [US5] Código específico de plataforma aislado en `src-tauri/src/platform/windows.rs` (y `mod.rs`)
 
 ---
 
@@ -271,7 +271,7 @@ description: "Lista de tareas para Markdown Desktop Editor"
 - [x] T114 Revisar dependencias (justificación y tamaño) y eliminar las no usadas en `package.json` y `src-tauri/Cargo.toml` (Principio I/IX)
 - [x] T115 Suite E2E completa (UI + nativa) pasando en CI en `.github/workflows/ci.yml`
 - [ ] T116 `npm run tauri build`: generar instalador NSIS y validar V1–V15 de quickstart.md en una máquina sin Node/Rust (SC-009, SC-010)
-- [ ] T117 Actualizar `specs/001-markdown-desktop-editor/spec.md` y `plan.md` con los resultados de spikes y mediciones; cerrar ítems pendientes de Assumptions (umbral de tamaño, codificaciones soportadas)
+- [X] T117 Actualizar `specs/001-markdown-desktop-editor/spec.md` y `plan.md` con los resultados de spikes y mediciones; cerrar ítems pendientes de Assumptions (umbral de tamaño, codificaciones soportadas)
 
 ---
 

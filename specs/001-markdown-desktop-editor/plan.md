@@ -164,3 +164,11 @@ Dependencia externa: publicar `mdwysiwyg` 0.3 con U1–U3 en paralelo a las fase
 ## Complexity Tracking
 
 Sin violaciones de la constitución que justificar.
+
+## Resultados (cierre de la feature 001, 2026-11-14)
+
+- Spikes S1–S6 consolidados en `docs/spikes.md`: pool de 3 editores montados (S1), fidelidad de serialización documentada (S2), instancia única y asociaciones de archivo verificadas en build real (S3), menú Edición nativo sin aceleradores con atajos en el frontend (S4), pruebas nativas por CDP sobre WebView2 (S5), reordenado de pestañas con Pointer Events (S6).
+- Mediciones en `docs/performance.md`: umbral de aviso 256 KB; < 250 MB privados con un documento (201–210 MB con mdwysiwyg 0.8.0); cambio de pestaña ~55 ms con 100 KB.
+- Codificaciones: UTF-8 (±BOM), UTF-16 LE/BE con BOM y las de un byte detectadas por `chardetng` que decodifican sin reemplazos.
+- Código específico de plataforma aislado en `src-tauri/src/platform/` (prefijo `\?\` y claves de ruta sin distinguir mayúsculas en Windows).
+- Pendiente de la persona propietaria: T116 (instalador en una máquina limpia).

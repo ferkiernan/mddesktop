@@ -26,7 +26,7 @@ pub struct ExternalChange {
 }
 
 fn key(p: &Path) -> String {
-    p.to_string_lossy().to_lowercase()
+    crate::platform::path_key(p)
 }
 
 /// Last fingerprint produced by our own read/write per path (lower-cased key).

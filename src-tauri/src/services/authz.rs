@@ -21,13 +21,9 @@ pub fn is_markdown(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-/// Strips the Windows verbatim prefix so paths dedupe and display well.
+/// Display form of a canonical path (Windows: no verbatim prefix) so paths dedupe and display well.
 fn simplify(p: PathBuf) -> PathBuf {
-    let s = p.to_string_lossy();
-    match s.strip_prefix(r"\\?\") {
-        Some(rest) if !rest.starts_with("UNC\\") => PathBuf::from(rest),
-        _ => p,
-    }
+    crate::platform::display_path(p)
 }
 
 /// Canonical form; for a file that does not exist yet, canonicalizes its parent.
