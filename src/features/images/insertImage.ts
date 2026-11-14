@@ -20,10 +20,10 @@ export async function insertImage(): Promise<void> {
   if (!id || !doc) return;
 
   const editor = getEditor(id);
-  if (!editor?.insertMarkdown) {
+  if (!editor?.insertMarkdown) { // only while the lazy editor is still mounting
     await ask({
       title: "Insertar imagen no disponible",
-      message: "El editor instalado no permite insertar contenido desde la aplicación (requiere mdwysiwyg con insertMarkdown).",
+      message: "El editor todavía se está cargando. Vuelve a intentarlo en un momento.",
       buttons: ok,
     });
     return;

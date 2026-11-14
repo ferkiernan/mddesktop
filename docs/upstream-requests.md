@@ -15,28 +15,15 @@ fallbacks below, and switches automatically when the handle exposes the new meth
 
 Open an issue per item in the `mdwysiwyg` repository and link it here when created.
 
-## Status (2026-11-02)
+## Status (2026-11-14, mdwysiwyg 0.8.0)
 
-U1 (`setMarkdown`), U2 (`insertMarkdown`) and U3 (`resolveImageSrc`): PR https://github.com/ferkiernan/mdwysiwyg/pull/2 (open, not merged, not published). Same change as
-[`mdwysiwyg-host-api.patch`](mdwysiwyg-host-api.patch) (against `ferkiernan/mdwysiwyg` master; all 153 tests pass,
-4 new in `tests/MarkdownEditor/host-integration.test.tsx`). Nothing has been published to npm.
-
-To apply: `git apply docs/mdwysiwyg-host-api.patch` in a checkout of `mdwysiwyg`, update its README/CHANGELOG, bump to
-0.3.0, publish, then set `"mdwysiwyg": "^0.3.0"` here.
-
-Verified end to end in the real app with the patched build installed via `npm install --no-save <tarball>`:
-`node tests/e2e/native/images.cdp.mjs <exe>` renders `![foto](assets/mi%20foto.png)` through the `asset:` protocol
-(folder name and file name with spaces). Until 0.3 is published the app keeps working without it: "Insertar imagen…"
-explains that the editor cannot insert, and relative images are shown unresolved.
-
-## U6 — Published package renders unstyled (bug, 0.2.1)
-
-`tsup` bundles `*.module.css` as global CSS and exports an **empty class map**
-(`var MarkdownEditor_default = {}` in `dist/index.js`), so `styles["root"]`, `styles["toolbar"]`… are `undefined` and no element
-gets its class: the toolbar shows bare buttons without icons/gradient, tables and code blocks are unstyled. The demo site
-looks fine only because it builds from source with Vite.
-
-Fix (one line in `tsup.config.ts`: `loader: { ".css": "local-css" }`): [`mdwysiwyg-css-modules.patch`](mdwysiwyg-css-modules.patch),
-committed on a local branch `fix/css-modules-class-map` of the clone (not pushed). **Needs a new release (0.2.2/0.3.0)**; until
-then a fresh `npm install` of this app shows the unstyled editor. The app's style presets (Configuración > Estilo del editor)
-were verified against a locally packed build with the fix.
+| ID | State |
+|---|---|
+| U1 `setMarkdown` | **Shipped** in 0.3.0 (typed in the app since spec 003) |
+| U2 `insertMarkdown` | **Shipped** in 0.3.0; used by Insertar > Imagen… |
+| U3 `resolveImageSrc` | **Shipped** in 0.3.0; relative images resolve through `asset:` |
+| U4 view state API | Open; the pool of 3 editors remains |
+| U5 duplicate `link` warning | Open (still logged by 0.8.0) |
+| U6 unstyled package | **Fixed** (fix tagged 0.3.1, never published; first published with it: 0.4.0; `verify:dist` guards it) |
+| U7 history bar in Spanish | **New**: "Confirm" / "Cancel (back to last version)" and the arrows' labels should be localizable or Spanish like the rest of the UI |
+| U8 Mermaid theme option | **New**: a prop or variable to pick Mermaid's theme (e.g. `dark`) so dark styles can draw dark diagrams; today the app keeps diagram backgrounds light (bug `pdf-mermaid-missing`) |

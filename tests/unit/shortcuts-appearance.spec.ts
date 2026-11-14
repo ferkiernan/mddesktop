@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { matchShortcut, startShortcuts, type KeyLike } from "../../src/features/shortcuts/manager";
 import { useSettings, DEFAULT_PREFS } from "../../src/features/settings/store";
-import { toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../../src/features/settings/appearance";
+import {
+  toggleEditorHistory,
+  toggleEditorToolbar,
+  toggleStatusBar,
+  toggleTheme,
+  zoomIn,
+  zoomOut,
+  zoomReset,
+} from "../../src/features/settings/appearance";
+import { runMenuAction } from "../../src/app/menuBridge";
 import { installMockIpc } from "../helpers/mockIpc";
 
 const key = (k: string, o: Partial<KeyLike> = {}): KeyLike => ({
@@ -57,6 +66,7 @@ describe("appearance (theme, zoom, status bar)", () => {
     ipc = installMockIpc({
       settings_save: (a) => ({ ...useSettings.getState().prefs, ...(a?.patch as object) }),
       set_style_menu: () => null,
+      set_view_menu: () => null,
     });
   });
   afterEach(() => ipc.restore());
@@ -84,5 +94,23 @@ describe("appearance (theme, zoom, status bar)", () => {
   it("toggles the status bar", async () => {
     await toggleStatusBar();
     expect(useSettings.getState().prefs.statusBarVisible).toBe(false);
+  });
+
+  it("editor toolbar and version history are on by default, toggle, persist and sync the menu checks", async () => {
+    expect(DEFAULT_PREFS.editorToolbarVisible && DEFAULT_PREFS.editorHistory).toBe(true);
+    await toggleEditorToolbar();
+    await toggleEditorHistory();
+    const p = useSettings.getState().prefs;
+    expect([p.editorToolbarVisible, p.editorHistory]).toEqual([false, false]);
+    const saves = ipc.calls.filter((c) => c.cmd === "settings_save").map((c) => c.args?.patch);
+    expect(saves).toEqual(expect.arrayContaining([{ editorToolbarVisible: false }, { editorHistory: false }]));
+    expect(ipc.calls.filter((c) => c.cmd === "set_view_menu").at(-1)?.args).toEqual({ toolbar: false, history: false });
+  });
+
+  it("the native menu actions reach the toggles", async () => {
+    runMenuAction("view.toggleToolbar");
+    runMenuAction("settings.toggleHistory");
+    await vi.waitFor(() => expect(useSettings.getState().prefs.editorHistory).toBe(false));
+    expect(useSettings.getState().prefs.editorToolbarVisible).toBe(false);
   });
 });

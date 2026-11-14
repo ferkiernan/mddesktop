@@ -74,6 +74,7 @@ export const app = {
   confirmExit: () => call("confirm_exit", Void),
   getLaunchFiles: () => call("get_launch_files", Paths),
   setStyleMenu: (style: string) => call("set_style_menu", Void, { style }),
+  setViewMenu: (toolbar: boolean, history: boolean) => call("set_view_menu", Void, { toolbar, history }),
 };
 
 export const images = {

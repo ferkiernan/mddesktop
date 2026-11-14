@@ -47,6 +47,7 @@ pub fn run() {
             commands::app::confirm_exit,
             commands::app::get_launch_files,
             commands::app::set_style_menu,
+            commands::app::set_view_menu,
             commands::session::session_load,
             commands::session::session_save,
             commands::session::recovery_write,

@@ -24,5 +24,13 @@ export const zoomIn = () => zoomBy(ZOOM_STEP);
 export const zoomOut = () => zoomBy(-ZOOM_STEP);
 export const zoomReset = () => useSettings.getState().update({ uiZoom: 1 });
 
+/** Ver > Mostrar barra de herramientas (mdwysiwyg `showToolbar`). */
+export const toggleEditorToolbar = () =>
+  useSettings.getState().update({ editorToolbarVisible: !useSettings.getState().prefs.editorToolbarVisible });
+
+/** Configuración > Historial de versiones (mdwysiwyg `historyUndo`). */
+export const toggleEditorHistory = () =>
+  useSettings.getState().update({ editorHistory: !useSettings.getState().prefs.editorHistory });
+
 export const toggleStatusBar = () =>
   useSettings.getState().update({ statusBarVisible: !useSettings.getState().prefs.statusBarVisible });

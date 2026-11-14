@@ -5,7 +5,16 @@ import { useDocuments } from "../features/documents/store";
 import { activateNext } from "../features/tabs/tabs";
 import { insertImage } from "../features/images/insertImage";
 import { runEdit } from "../features/editor/editCommands";
-import { setEditorStyle, toggleStatusBar, toggleTheme, zoomIn, zoomOut, zoomReset } from "../features/settings/appearance";
+import {
+  setEditorStyle,
+  toggleEditorHistory,
+  toggleEditorToolbar,
+  toggleStatusBar,
+  toggleTheme,
+  zoomIn,
+  zoomOut,
+  zoomReset,
+} from "../features/settings/appearance";
 import type { ExportFormat, MenuActionId } from "../services/contracts";
 
 export function runMenuAction(id: MenuActionId) {
@@ -70,6 +79,12 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "view.toggleStatusBar":
       void toggleStatusBar();
+      return;
+    case "view.toggleToolbar":
+      void toggleEditorToolbar();
+      return;
+    case "settings.toggleHistory":
+      void toggleEditorHistory();
       return;
     default:
       if (id.startsWith("style.")) void setEditorStyle(id.slice(6));

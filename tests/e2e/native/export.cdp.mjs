@@ -69,6 +69,8 @@ for (const format of ["html", "pdf", "docx", "odt"]) {
     check("html embeds the image and the diagram", html.includes("data:image/png;base64") && html.includes("data:image/svg+xml;base64"));
     check("html drops viewer classes (no dependency on external CSS)", !/ class="(?!page")/.test(html));
     check("html checkbox state kept", /checked="checked"/.test(html));
+    // 0.4.0+ table menu trigger (a button with a triangle clip-path) must never reach an export
+    check("html has no table-menu trigger", !/<button/i.test(html) && !html.includes("polygon(0px 0px, 100% 0px, 100% 100%)"));
     check("html table + code colours inlined", html.includes("<table") && /<pre[^>]*style="[^"]*(background|color)/.test(html));
   } else if (format === "pdf") {
     const s = buf.toString("latin1");

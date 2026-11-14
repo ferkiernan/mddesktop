@@ -18,6 +18,10 @@ pub struct Preferences {
     pub large_file_warn_bytes: u64,
     /// Editor style preset id (see src/features/settings/editorStyles.ts); unknown ids fall back in the UI.
     pub editor_style: String,
+    /// mdwysiwyg `showToolbar` (View menu). On by default.
+    pub editor_toolbar_visible: bool,
+    /// mdwysiwyg `historyUndo` (Settings menu). On by default (spec 003, owner's decision).
+    pub editor_history: bool,
 }
 
 impl Default for Preferences {
@@ -31,6 +35,8 @@ impl Default for Preferences {
             editor_pool_size: 3,
             large_file_warn_bytes: 256 * 1024,
             editor_style: "default".into(),
+            editor_toolbar_visible: true,
+            editor_history: true,
         }
     }
 }
@@ -231,6 +237,23 @@ mod tests {
         assert!(!std::fs::read_dir(d.path()).unwrap().any(|e| e.unwrap().file_name().to_string_lossy().contains("corrupt")));
         assert_eq!(a.save_settings(&serde_json::json!({ "editorStyle": "winamp" })).unwrap().editor_style, "winamp");
         assert_eq!(a.save_settings(&serde_json::json!({ "editorStyle": "../x; evil" })).unwrap().editor_style, "default");
+    }
+
+    #[test]
+    fn editor_toolbar_and_history_default_on_and_old_files_get_them() {
+        let d = tempfile::tempdir().unwrap();
+        let a = AppData::new(d.path());
+        let p = a.load_settings().unwrap();
+        assert!(p.editor_toolbar_visible && p.editor_history); // spec 003: both on by default
+        std::fs::write(d.path().join("settings.json"), r#"{"version":1,"theme":"dark"}"#).unwrap();
+        let p = a.load_settings().unwrap();
+        assert!(p.editor_toolbar_visible && p.editor_history);
+        let p = a.save_settings(&serde_json::json!({ "editorToolbarVisible": false, "editorHistory": false })).unwrap();
+        assert!(!p.editor_toolbar_visible && !p.editor_history);
+        assert_eq!(a.load_settings().unwrap(), p);
+        // wrong types are rejected without touching the stored values
+        assert!(a.save_settings(&serde_json::json!({ "editorHistory": "yes" })).is_err());
+        assert!(!a.load_settings().unwrap().editor_history);
     }
 
     #[test]

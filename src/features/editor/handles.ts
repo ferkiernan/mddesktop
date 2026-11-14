@@ -1,18 +1,16 @@
-// Live editor handles per document, with the optional capabilities added upstream (U1/U2).
-export interface EditorCaps {
-  isModified?(): boolean;
-  reset?(): void;
-  /** U2: insert Markdown at the cursor. */
-  insertMarkdown?(md: string): void;
-  /** U1: replace content as an undoable change. */
-  setMarkdown?(md: string): void;
-}
+// Live editor handles per document (mdwysiwyg >= 0.3: insertMarkdown / setMarkdown are part of the handle).
+import type { MarkdownEditorHandle } from "mdwysiwyg";
 
-const handles = new Map<string, EditorCaps>();
+export type EditorCaps = Pick<MarkdownEditorHandle, "isModified" | "reset" | "insertMarkdown" | "setMarkdown">;
 
-export function registerEditor(documentId: string, handle: EditorCaps | null) {
+/** A registered editor; methods are absent only while the lazy editor has not mounted yet. */
+export type EditorEntry = { [K in keyof EditorCaps]?: EditorCaps[K] };
+
+const handles = new Map<string, EditorEntry>();
+
+export function registerEditor(documentId: string, handle: EditorEntry | null) {
   if (handle) handles.set(documentId, handle);
   else handles.delete(documentId);
 }
 
-export const getEditor = (documentId: string): EditorCaps | undefined => handles.get(documentId);
+export const getEditor = (documentId: string): EditorEntry | undefined => handles.get(documentId);

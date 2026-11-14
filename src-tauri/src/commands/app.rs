@@ -16,6 +16,15 @@ pub fn set_style_menu(state: State<'_, AppState>, style: String) {
     }
 }
 
+/// Syncs the "Mostrar barra de herramientas" / "Historial de versiones" check marks with the preferences.
+#[tauri::command]
+pub fn set_view_menu(state: State<'_, AppState>, toolbar: bool, history: bool) {
+    if let Some((t, h)) = state.view_items.lock().unwrap().as_ref() {
+        let _ = t.set_checked(toolbar);
+        let _ = h.set_checked(history);
+    }
+}
+
 /// Files passed on the command line of the first launch (already authorized). Drains the list.
 #[tauri::command]
 pub fn get_launch_files(state: State<'_, AppState>) -> Vec<PathBuf> {

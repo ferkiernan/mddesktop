@@ -41,7 +41,7 @@ for (const s of styles) {
   await sleep(3500);
   const info = JSON.parse(await evalJs(`JSON.stringify((() => {
     const root = document.querySelector(".mdd-editor");
-    const tb = root?.firstElementChild;
+    const tb = root?.querySelector(".MarkdownEditor_toolbar"); // 0.8.0 renders other nodes before the toolbar
     return { style: document.documentElement.dataset.editorStyle, rootClass: root?.className,
       toolbarBg: tb && getComputedStyle(tb).backgroundImage.slice(0, 40), icons: root?.querySelectorAll("svg").length };
   })())`));
@@ -50,6 +50,47 @@ for (const s of styles) {
   console.log(ok ? "ok  " : "FAIL", s, JSON.stringify(info));
   const shot = await send("Page.captureScreenshot", { format: "png" });
   writeFileSync(join(out, `${s}.png`), Buffer.from(shot.data, "base64"));
+
+  // spec 003 US3: the editor's floating table menu (portaled to body) follows the style
+  const cell = JSON.parse(await evalJs(`JSON.stringify((() => {
+    const r = document.querySelector(".editor-slot:not([hidden]) .ProseMirror td")?.getBoundingClientRect();
+    return r ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+  })())`));
+  if (cell) {
+    for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
+      await send("Input.dispatchMouseEvent", { type, x: cell.x, y: cell.y, button: type === "mouseMoved" ? "none" : "left", clickCount: 1 });
+    }
+    await sleep(300);
+    const t = JSON.parse(await evalJs(`JSON.stringify((() => {
+      const r = document.querySelector(".editor-slot:not([hidden]) [class*=tableMenuTrigger]")?.getBoundingClientRect();
+      return r ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+    })())`));
+    if (t) {
+      for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
+        await send("Input.dispatchMouseEvent", { type, x: t.x, y: t.y, button: type === "mouseMoved" ? "none" : "left", clickCount: 1 });
+      }
+      await sleep(400);
+    }
+    const m = JSON.parse(await evalJs(`JSON.stringify((() => {
+      const menus = document.querySelectorAll('[role="menu"]');
+      const el = menus[menus.length - 1];
+      if (!el) return null;
+      let bg = "";
+      for (let n = el; n && !bg; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== "rgba(0, 0, 0, 0)") bg = c; }
+      const probe = document.createElement("div");
+      probe.style.background = getComputedStyle(document.querySelector(".mdd-editor")).getPropertyValue("--mdw-popover-bg");
+      document.body.appendChild(probe);
+      const want = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return { bg, want };
+    })())`));
+    const okMenu = !!m && m.bg === m.want;
+    if (!okMenu) failures++;
+    console.log(okMenu ? "ok  " : "FAIL", `${s} table menu`, JSON.stringify(m));
+    const mshot = await send("Page.captureScreenshot", { format: "png" });
+    writeFileSync(join(out, `${s}-menu.png`), Buffer.from(mshot.data, "base64"));
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  }
 }
 console.log(failures ? `FAIL (${failures})` : "PASS", "screenshots in", out);
 ws.close();

@@ -12,6 +12,8 @@ export const DEFAULT_PREFS: Preferences = {
   editorPoolSize: 3,
   largeFileWarnBytes: 256 * 1024,
   editorStyle: "default",
+  editorToolbarVisible: true,
+  editorHistory: true,
 };
 
 interface SettingsState {
@@ -26,6 +28,7 @@ export function applyAppearance(p: Preferences) {
   const style = applyEditorStyle(p.editorStyle);
   document.documentElement.style.setProperty("zoom", String(p.uiZoom));
   app.setStyleMenu(style.id).catch(() => undefined); // keep the native check mark in sync (no-op outside Tauri)
+  app.setViewMenu(p.editorToolbarVisible, p.editorHistory).catch(() => undefined);
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({

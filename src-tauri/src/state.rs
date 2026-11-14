@@ -13,4 +13,6 @@ pub struct AppState {
     pub launch_files: Mutex<Vec<PathBuf>>,
     /// Check items of Configuración > Estilo del editor, by preset id.
     pub style_items: Mutex<Vec<(String, CheckMenuItem<Wry>)>>,
+    /// "Mostrar barra de herramientas" (Ver) and "Historial de versiones" (Configuración) check items.
+    pub view_items: Mutex<Option<(CheckMenuItem<Wry>, CheckMenuItem<Wry>)>>,
 }

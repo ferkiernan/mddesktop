@@ -10,6 +10,9 @@ Developed spec-first with [GitHub Spec Kit](https://github.com/github/spec-kit):
 - Unsaved-changes protection and crash recovery (~4 s)
 - Opens files from Explorer, drag and drop and the command line (single instance)
 - Light/dark theme, UI zoom, status bar toggle
+- 7 editor styles (Configuración > Estilo del editor) that theme the whole editor, including code highlighting, quotes, links, menus and dialogs
+- Ver > **Mostrar barra de herramientas** (on by default) hides or shows the editor toolbar without touching the document
+- Configuración > **Historial de versiones** (on by default): the editor keeps a version after 3 s without changes (up to 200, in memory) and the clock button browses them; confirming an older version is a normal edit. Versions live per open editor: they are lost when the tab is closed or the editor is unloaded, and are not kept between sessions
 - Export to HTML (self-contained), PDF, Word (.docx) and OpenDocument (.odt), always A4: see [docs/export.md](docs/export.md)
 - Works offline; no telemetry
 

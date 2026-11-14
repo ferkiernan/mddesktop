@@ -58,6 +58,10 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&item("insert.image", "Imagen…")?)
         .build()?;
 
+    // editor options (spec 003): both on by default; the frontend keeps the marks in sync (set_view_menu)
+    let toolbar = CheckMenuItemBuilder::with_id("view.toggleToolbar", "Mostrar barra de herramientas").checked(true).build(app)?;
+    let history = CheckMenuItemBuilder::with_id("settings.toggleHistory", "Historial de versiones").checked(true).build(app)?;
+
     let view = SubmenuBuilder::new(app, "Ver")
         .item(&item("view.toggleTheme", "Alternar tema claro/oscuro")?)
         .separator()
@@ -66,6 +70,7 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&item("view.zoomReset", "Restablecer zoom\tCtrl+0")?)
         .separator()
         .item(&item("view.toggleStatusBar", "Mostrar/ocultar barra de estado")?)
+        .item(&toolbar)
         .build()?;
 
     // Configuración > Estilo del editor: one check item per preset (the frontend keeps the mark in sync)
@@ -78,7 +83,12 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         styles = styles.item(&check);
         state.style_items.lock().unwrap().push((id.to_string(), check));
     }
-    let settings = SubmenuBuilder::new(app, "Configuración").item(&styles.build()?).build()?;
+    let settings = SubmenuBuilder::new(app, "Configuración")
+        .item(&styles.build()?)
+        .separator()
+        .item(&history)
+        .build()?;
+    *state.view_items.lock().unwrap() = Some((toolbar, history));
 
     let menu = MenuBuilder::new(app)
         .item(&file)

@@ -4,6 +4,7 @@ export const FP = { mtimeMs: 1, size: 3, hash: "h1" };
 export const PREFS = {
   version: 1, theme: "light", uiZoom: 1, statusBarVisible: true,
   lastDirectory: null, editorPoolSize: 3, largeFileWarnBytes: 262144, editorStyle: "default",
+  editorToolbarVisible: true, editorHistory: true,
 };
 
 export type Responses = Record<string, unknown>;

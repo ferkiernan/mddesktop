@@ -69,6 +69,8 @@ export const PreferencesSchema = z.object({
   editorPoolSize: z.number().int().min(1).max(8),
   largeFileWarnBytes: z.number().int().positive(),
   editorStyle: z.string().min(1).max(32),
+  editorToolbarVisible: z.boolean(),
+  editorHistory: z.boolean(),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
 
@@ -136,6 +138,8 @@ const BaseMenuActionIdSchema = z.enum([
   "view.zoomOut",
   "view.zoomReset",
   "view.toggleStatusBar",
+  "view.toggleToolbar",
+  "settings.toggleHistory",
   "tab.next",
   "tab.prev",
 ]);
