@@ -34,11 +34,30 @@ function untilQuiet(el: HTMLElement, quietMs: number, maxMs: number): Promise<vo
   });
 }
 
-/** Mermaid blocks render asynchronously (lazy-loaded library): wait until each has an svg or its fallback. */
-function mermaidPending(root: HTMLElement): boolean {
-  return Array.from(root.querySelectorAll("[data-mermaid-block]")).some(
-    (b) => !b.querySelector("svg") && !b.querySelector("pre"),
-  );
+/**
+ * Mermaid blocks render asynchronously (lazy-loaded library). The editor paints the source as a `<pre>`
+ * placeholder first and swaps in the svg when rendering ends, so a `<pre>` alone does not mean "done":
+ * a block is pending while it has no svg and its source is a diagram Mermaid can parse (an unparsable
+ * one keeps the `<pre>` for good, as on screen).
+ */
+async function mermaidPending(root: HTMLElement, verdicts: Map<string, boolean>): Promise<boolean> {
+  for (const b of Array.from(root.querySelectorAll("[data-mermaid-block]"))) {
+    if (b.querySelector("svg")) continue;
+    const source = b.querySelector("pre")?.textContent?.trim();
+    if (!source) return true; // nothing painted yet
+    if (!verdicts.has(source)) verdicts.set(source, await canRender(source));
+    if (verdicts.get(source)) return true;
+  }
+  return false;
+}
+
+async function canRender(source: string): Promise<boolean> {
+  try {
+    const mermaid = (await import("mermaid")).default;
+    return (await mermaid.parse(source, { suppressErrors: true })) !== false;
+  } catch {
+    return false;
+  }
 }
 
 export interface ViewerHandle {
@@ -91,7 +110,8 @@ export async function withViewer<T>(
     if (!content) throw new Error("No se pudo preparar el visor para exportar");
 
     await untilQuiet(host, QUIET_MS, MAX_WAIT_MS);
-    while (mermaidPending(host) && Date.now() - start < MAX_WAIT_MS) await sleep(100);
+    const verdicts = new Map<string, boolean>();
+    while ((await mermaidPending(host, verdicts)) && Date.now() - start < MAX_WAIT_MS) await sleep(100);
     await Promise.all(
       Array.from(content.querySelectorAll("img")).map((img) =>
         img.complete ? undefined : new Promise<void>((r) => ((img.onload = img.onerror = () => r()), undefined)),
