@@ -160,3 +160,36 @@ test("Temas: the tab bar background can be chosen; the status bar keeps its colo
   expect(statusAfter).not.toContain("139, 0, 0");
   expect(statusBefore).toMatch(/^linear-gradient/);
 });
+
+test("Temas: compact colour fields, icon reset on the same row, tab bar field always has a picker (spec 012)", async ({ page }) => {
+  await open(page);
+  await menu(page, "settings.themes");
+  const panel = page.getByRole("dialog", { name: "Temas" });
+  await panel.getByRole("button", { name: "Duplicar" }).click();
+  // US3: the bar in a format the picker cannot take directly still gives the tab field a picker
+  const bar = panel.getByRole("textbox", { name: "Barra de herramientas: valor" });
+  await bar.fill("hsl(0, 0%, 80%)");
+  await bar.press("Enter");
+  const tabsPicker = panel.getByLabel("Fondo de la barra de pestañas: selector de color");
+  await expect(tabsPicker).toBeVisible();
+  expect(await tabsPicker.inputValue()).toBe("#cccccc");
+  await expect(panel.getByRole("textbox", { name: "Fondo de la barra de pestañas: valor" })).toHaveAttribute("placeholder", "automático");
+  // US1/US2: advanced mode, change "Fondo suave"
+  await panel.getByRole("tab", { name: "Avanzado" }).click();
+  const value = panel.getByRole("textbox", { name: "Fondo suave: valor" });
+  const before = await value.inputValue();
+  await value.fill("#ff0000");
+  await value.press("Enter");
+  const reset = panel.getByRole("button", { name: "Restablecer Fondo suave" });
+  await expect(reset).toBeVisible();
+  await expect(reset).toHaveAttribute("title", "Restablecer");
+  await expect(reset).toHaveText("");
+  const [r, v] = [(await reset.boundingBox())!, (await value.boundingBox())!];
+  expect(Math.abs(r.y + r.height / 2 - (v.y + v.height / 2))).toBeLessThan(4); // same row
+  expect(r.x).toBeGreaterThan(v.x + v.width);
+  expect(v.width).toBeGreaterThanOrEqual(70);
+  expect(v.width).toBeLessThanOrEqual(95); // about half of the former 150 px
+  await reset.press("Enter");
+  await expect(value).toHaveValue(before);
+  await expect(panel.getByRole("button", { name: "Restablecer Fondo suave" })).toHaveCount(0);
+});

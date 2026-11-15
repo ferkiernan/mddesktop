@@ -60,11 +60,38 @@ interface Draft {
   isNew: boolean;
 }
 
-/** `#rrggbb` for the colour picker; null when the value is not a plain colour (e.g. a gradient). */
+/**
+ * `#rrggbb` for the colour picker. Any CSS colour is resolved by the browser (names, `hsl()`, …);
+ * for a gradient the first colour stop is used. Null only when nothing colour-like can be read.
+ */
 function pickerValue(v: string | undefined): string | null {
-  const c = parseColor(v);
-  return c ? `#${hex(c).toLowerCase()}` : null;
+  if (!v) return null;
+  const direct = parseColor(v);
+  if (direct) return `#${hex(direct).toLowerCase()}`;
+  const candidates = [v, ...(v.match(/(#[0-9a-f]{3,8}\b|(?:rgba?|hsla?)\([^)]*\)|\b[a-z]+\b)/gi) ?? [])];
+  const probe = document.createElement("span");
+  document.body.appendChild(probe);
+  try {
+    for (const c of candidates) {
+      if (!CSS.supports("color", c)) continue;
+      probe.style.color = "";
+      probe.style.color = c;
+      const rgb = parseColor(getComputedStyle(probe).color);
+      if (rgb) return `#${hex(rgb).toLowerCase()}`;
+    }
+  } finally {
+    probe.remove();
+  }
+  return null;
 }
+
+/** Circular-arrow "reset" icon drawn with the text colour. */
+const ResetIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path d="M3.5 8a4.5 4.5 0 1 0 1.32-3.18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M4.2 1.8v3.2h3.2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 function isValidCss(v: string): boolean {
   const safe = v.length > 0 && v.length <= 240 && /^[\w #(),.%'"+-]+$/.test(v) && !/url\(|expression/i.test(v);
@@ -78,11 +105,12 @@ function ColorField({ label, value, onChange, onReset, custom, fallback }: { lab
   const bad = badFor === value;
   const text = editing ?? value;
   // an optional colour that is not set yet starts the picker from what is shown today (`fallback`)
-  const picker = pickerValue(value) ?? (fallback ? pickerValue(fallback) : null);
+  // every field has a picker (spec 012 FR-006), even when the value cannot be shown as a single colour
+  const picker = pickerValue(value) ?? (fallback ? pickerValue(fallback) : null) ?? "#000000";
   return (
     <div className={`theme-field${custom ? " custom" : ""}`}>
       <span className="theme-field-label">{label}{custom ? " ·" : ""}</span>
-      {picker && <input type="color" aria-label={`${label}: selector de color`} value={picker} onChange={(e) => onChange(e.target.value)} />}
+      <input type="color" aria-label={`${label}: selector de color`} value={picker} onChange={(e) => onChange(e.target.value)} />
       <input
         type="text"
         aria-label={`${label}: valor`}
@@ -102,10 +130,12 @@ function ColorField({ label, value, onChange, onReset, custom, fallback }: { lab
           if (e.key === "Enter") (e.target as HTMLInputElement).blur();
         }}
       />
-      {onReset && custom && (
-        <button type="button" className="theme-reset" onClick={onReset} title="Volver al valor derivado">
-          Restablecer
+      {onReset && custom ? (
+        <button type="button" className="theme-reset" onClick={onReset} title="Restablecer" aria-label={`Restablecer ${label}`}>
+          <ResetIcon />
         </button>
+      ) : (
+        <span className="theme-reset-slot" aria-hidden="true" />
       )}
       {bad && <span className="theme-field-error" role="alert">Color no válido</span>}
     </div>
