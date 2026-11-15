@@ -52,7 +52,11 @@
           "Spanish",
           "English"
         ],
-        "installerHooks": "installer-hooks.nsh"
+        "installerHooks": "installer-hooks.nsh",
+        "customLanguageFiles": {
+          "Spanish": "nsis/Spanish.nsh",
+          "English": "nsis/English.nsh"
+        }
       }
     },
     "icon": [
