@@ -64,6 +64,20 @@ await sleep(4000);
 s = await state();
 check("history back on", s.toolbar === 1 && s.history === 1, JSON.stringify(s));
 
+// spec 015: Configuración > Desactivar corrector ortográfico (menu action -> preference -> editor), kept after reload
+const spell = () => evalJs(`document.querySelector(".editor-slot:not([hidden]) .ProseMirror")?.spellcheck`);
+check("spell checking on by default", (await spell()) === true);
+await evalJs(`window.__TAURI_INTERNALS__.invoke("plugin:event|emit", { event: "menu://action", payload: { id: "settings.toggleSpellcheck" } })`);
+await sleep(1000);
+check("menu check turns spell checking off", (await spell()) === false);
+await send("Page.reload");
+await sleep(4000);
+check("still off after reload", (await spell()) === false);
+await evalJs(`window.__TAURI_INTERNALS__.invoke("settings_save", { patch: { spellcheckDisabled: false } })`);
+await send("Page.reload");
+await sleep(4000);
+check("back on", (await spell()) === true);
+
 ws.close();
 try { execSync(`taskkill /F /T /IM ${exeName}`, { stdio: "ignore" }); } catch {}
 rmSync(DATA_DIR, { recursive: true, force: true });

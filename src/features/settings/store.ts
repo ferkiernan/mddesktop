@@ -15,6 +15,7 @@ export const DEFAULT_PREFS: Preferences = {
   editorStyle: "default",
   editorToolbarVisible: true,
   editorHistory: true,
+  spellcheckDisabled: false,
   exportStyle: "screen",
   contentZoom: 1,
   barScale: 1,
@@ -32,7 +33,7 @@ export function applyAppearance(p: Preferences) {
   const style = applyEditorStyle(p.editorStyle);
   applyZoom(p.contentZoom, p.barScale);
   app.setStyleMenu(style.id).catch(() => undefined); // keep the native check mark in sync (no-op outside Tauri)
-  app.setViewMenu(p.editorToolbarVisible, p.editorHistory).catch(() => undefined);
+  app.setViewMenu(p.editorToolbarVisible, p.editorHistory, p.spellcheckDisabled).catch(() => undefined);
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({

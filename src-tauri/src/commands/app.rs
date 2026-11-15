@@ -17,12 +17,14 @@ pub fn set_style_menu(state: State<'_, AppState>, style: String) {
     }
 }
 
-/// Syncs the "Mostrar barra de herramientas" / "Historial de versiones" check marks with the preferences.
+/// Syncs the "Mostrar barra de herramientas" / "Historial de versiones" / "Desactivar corrector ortográfico"
+/// check marks with the preferences.
 #[tauri::command]
-pub fn set_view_menu(state: State<'_, AppState>, toolbar: bool, history: bool) {
-    if let Some((t, h)) = state.view_items.lock().unwrap().as_ref() {
+pub fn set_view_menu(state: State<'_, AppState>, toolbar: bool, history: bool, spellcheck_disabled: bool) {
+    if let Some((t, h, s)) = state.view_items.lock().unwrap().as_ref() {
         let _ = t.set_checked(toolbar);
         let _ = h.set_checked(history);
+        let _ = s.set_checked(spellcheck_disabled);
     }
 }
 

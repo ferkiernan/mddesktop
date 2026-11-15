@@ -57,6 +57,8 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
     // editor options (spec 003): both on by default; the frontend keeps the marks in sync (set_view_menu)
     let toolbar = CheckMenuItemBuilder::with_id("view.toggleToolbar", "Mostrar barra de herramientas").checked(true).build(app)?;
     let history = CheckMenuItemBuilder::with_id("settings.toggleHistory", "Historial de versiones").checked(true).build(app)?;
+    // spec 015: unchecked by default (the spell checker works)
+    let spellcheck = CheckMenuItemBuilder::with_id("settings.toggleSpellcheck", "Desactivar corrector ortográfico").checked(false).build(app)?;
 
     let view = SubmenuBuilder::new(app, "Ver")
         .item(&item("view.toggleTheme", "Alternar estilo claro/oscuro")?)
@@ -87,8 +89,9 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&themes)
         .separator()
         .item(&history)
+        .item(&spellcheck)
         .build()?;
-    *state.view_items.lock().unwrap() = Some((toolbar, history));
+    *state.view_items.lock().unwrap() = Some((toolbar, history, spellcheck));
 
     let help = SubmenuBuilder::new(app, "Ayuda")
         .item(&item("help.about", "Acerca de MD Desktop…")?)

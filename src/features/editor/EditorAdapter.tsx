@@ -29,6 +29,8 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange, onN
   // editor options (spec 003): toggling them never remounts the editor nor fires onChange
   const showToolbar = useSettings((s) => s.prefs.editorToolbarVisible);
   const historyUndo = useSettings((s) => s.prefs.editorHistory);
+  // spec 015: `spellcheck` is inherited by the editable area (the editor sets none of its own)
+  const spellcheckDisabled = useSettings((s) => s.prefs.spellcheckDisabled);
   // spec 008: external change being compared (app content = original, disk version = proposal)
   const compare = useDocuments((s) => s.docs[documentId]?.compare ?? null);
   const comparing = useRef(false);
@@ -78,6 +80,7 @@ function EditorAdapterImpl({ documentId, initialContent, revision, onChange, onN
     <div
       ref={wrapper}
       className="editor-interaction"
+      spellCheck={spellcheckDisabled ? false : undefined}
       onClickCapture={(e) => {
         // toolbar buttons, popovers, checkboxes... (React capture also sees portaled popovers)
         if (isEditClick(e.target as Element)) tracker.mark();

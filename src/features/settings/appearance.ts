@@ -26,5 +26,9 @@ export const toggleEditorToolbar = () =>
 export const toggleEditorHistory = () =>
   useSettings.getState().update({ editorHistory: !useSettings.getState().prefs.editorHistory });
 
+/** Configuración > Desactivar corrector ortográfico (spec 015). */
+export const toggleSpellcheck = () =>
+  useSettings.getState().update({ spellcheckDisabled: !useSettings.getState().prefs.spellcheckDisabled });
+
 export const toggleStatusBar = () =>
   useSettings.getState().update({ statusBarVisible: !useSettings.getState().prefs.statusBarVisible });

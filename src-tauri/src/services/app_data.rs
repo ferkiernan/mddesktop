@@ -22,6 +22,8 @@ pub struct Preferences {
     pub editor_toolbar_visible: bool,
     /// mdwysiwyg `historyUndo` (Settings menu). On by default (spec 003, owner's decision).
     pub editor_history: bool,
+    /// Configuración > Desactivar corrector ortográfico (spec 015). Off by default: the spell checker works.
+    pub spellcheck_disabled: bool,
     /// Style used by File > Export: "screen" (the active style) or a style id (spec 005).
     pub export_style: String,
     /// Zoom of the document content only (spec 007): 0.5-3.0 in 5 % steps. Replaces `ui_zoom`.
@@ -43,6 +45,7 @@ impl Default for Preferences {
             editor_style: "default".into(),
             editor_toolbar_visible: true,
             editor_history: true,
+            spellcheck_disabled: false,
             export_style: "screen".into(),
             content_zoom: 1.0,
             bar_scale: 1.0,
@@ -281,6 +284,20 @@ mod tests {
         // wrong types are rejected without touching the stored values
         assert!(a.save_settings(&serde_json::json!({ "editorHistory": "yes" })).is_err());
         assert!(!a.load_settings().unwrap().editor_history);
+    }
+
+    #[test]
+    fn spellcheck_disabled_defaults_off_and_is_saved() {
+        let d = tempfile::tempdir().unwrap();
+        let a = AppData::new(d.path());
+        assert!(!a.load_settings().unwrap().spellcheck_disabled); // spec 015: unchecked by default
+        std::fs::write(d.path().join("settings.json"), r#"{"version":1,"theme":"dark"}"#).unwrap();
+        assert!(!a.load_settings().unwrap().spellcheck_disabled); // older files lack the field
+        let p = a.save_settings(&serde_json::json!({ "spellcheckDisabled": true })).unwrap();
+        assert!(p.spellcheck_disabled);
+        assert!(a.load_settings().unwrap().spellcheck_disabled);
+        assert!(a.save_settings(&serde_json::json!({ "spellcheckDisabled": "no" })).is_err());
+        assert!(a.load_settings().unwrap().spellcheck_disabled);
     }
 
     #[test]

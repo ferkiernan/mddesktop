@@ -71,6 +71,8 @@ export const PreferencesSchema = z.object({
   editorStyle: z.string().min(1).max(32),
   editorToolbarVisible: z.boolean(),
   editorHistory: z.boolean(),
+  /** spec 015: Configuración > Desactivar corrector ortográfico (off by default). */
+  spellcheckDisabled: z.boolean(),
   exportStyle: z.string().min(1).max(32),
   contentZoom: z.number().min(0.5).max(3),
   barScale: z.number().min(0.75).max(2),
@@ -160,6 +162,7 @@ const BaseMenuActionIdSchema = z.enum([
   "view.toggleStatusBar",
   "view.toggleToolbar",
   "settings.toggleHistory",
+  "settings.toggleSpellcheck",
   "settings.themes",
   "help.about",
   "tab.next",

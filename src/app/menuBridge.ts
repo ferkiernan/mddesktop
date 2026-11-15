@@ -7,6 +7,7 @@ import { runEdit } from "../features/editor/editCommands";
 import {
   setEditorStyle,
   toggleEditorHistory,
+  toggleSpellcheck,
   toggleEditorToolbar,
   toggleStatusBar,
   toggleTheme,
@@ -87,6 +88,9 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "settings.toggleHistory":
       void toggleEditorHistory();
+      return;
+    case "settings.toggleSpellcheck":
+      void toggleSpellcheck();
       return;
     default:
       if (id.startsWith("style.")) void setEditorStyle(id.slice(6));

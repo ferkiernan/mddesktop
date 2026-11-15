@@ -3,6 +3,7 @@ import { matchShortcut, startShortcuts, type KeyLike } from "../../src/features/
 import { useSettings, DEFAULT_PREFS } from "../../src/features/settings/store";
 import {
   toggleEditorHistory,
+  toggleSpellcheck,
   toggleEditorToolbar,
   toggleStatusBar,
   toggleTheme,
@@ -105,7 +106,17 @@ describe("appearance (theme, zoom, status bar)", () => {
     expect([p.editorToolbarVisible, p.editorHistory]).toEqual([false, false]);
     const saves = ipc.calls.filter((c) => c.cmd === "settings_save").map((c) => c.args?.patch);
     expect(saves).toEqual(expect.arrayContaining([{ editorToolbarVisible: false }, { editorHistory: false }]));
-    expect(ipc.calls.filter((c) => c.cmd === "set_view_menu").at(-1)?.args).toEqual({ toolbar: false, history: false });
+    expect(ipc.calls.filter((c) => c.cmd === "set_view_menu").at(-1)?.args).toEqual({ toolbar: false, history: false, spellcheckDisabled: false });
+  });
+
+  it("spell checking is on by default; Configuración > Desactivar corrector ortográfico toggles, persists and syncs its check (spec 015)", async () => {
+    expect(DEFAULT_PREFS.spellcheckDisabled).toBe(false);
+    runMenuAction("settings.toggleSpellcheck");
+    await vi.waitFor(() => expect(useSettings.getState().prefs.spellcheckDisabled).toBe(true));
+    expect(ipc.calls.filter((c) => c.cmd === "settings_save").map((c) => c.args?.patch)).toContainEqual({ spellcheckDisabled: true });
+    expect(ipc.calls.filter((c) => c.cmd === "set_view_menu").at(-1)?.args).toMatchObject({ spellcheckDisabled: true });
+    await toggleSpellcheck();
+    expect(useSettings.getState().prefs.spellcheckDisabled).toBe(false);
   });
 
   it("the native menu actions reach the toggles", async () => {

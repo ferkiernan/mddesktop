@@ -19,5 +19,5 @@ pub struct AppState {
     /// Separator + check items of the custom styles currently in that submenu.
     pub custom_style_items: Mutex<Vec<(String, CheckMenuItem<Wry>)>>,
     pub custom_style_separator: Mutex<Option<PredefinedMenuItem<Wry>>>,
-    pub view_items: Mutex<Option<(CheckMenuItem<Wry>, CheckMenuItem<Wry>)>>,
+    pub view_items: Mutex<Option<(CheckMenuItem<Wry>, CheckMenuItem<Wry>, CheckMenuItem<Wry>)>>,
 }

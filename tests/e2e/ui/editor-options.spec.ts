@@ -124,3 +124,27 @@ test("with version history turned off there is no history button", async ({ page
   await open(page, "# T\n", { editorHistory: false });
   await expect(page.getByRole("button", { name: "Historial de versiones" })).toHaveCount(0);
 });
+
+// spec 015: Configuración > Desactivar corrector ortográfico
+const spellcheck = (page: Page) => editor(page).evaluate((el) => (el as HTMLElement).spellcheck);
+
+test("spell checking is on by default and the Configuración check turns it off and on without touching the content", async ({ page }) => {
+  await open(page, "# Titulo\n\nTexto\n", {}, { settings_save: { __reject: { code: "IO", message: "offline" } } });
+  expect(await spellcheck(page)).toBe(true);
+  await editor(page).locator("p").click();
+  await page.keyboard.press("End");
+  await page.keyboard.type("x");
+  await menu(page, "settings.toggleSpellcheck");
+  await expect.poll(() => spellcheck(page)).toBe(false);
+  expect((await calls(page, "settings_save")).at(-1)).toMatchObject({ patch: { spellcheckDisabled: true } });
+  expect((await calls(page, "set_view_menu")).at(-1)).toMatchObject({ spellcheckDisabled: true });
+  await menu(page, "settings.toggleSpellcheck");
+  await expect.poll(() => spellcheck(page)).toBe(true);
+  await expect(editor(page)).toContainText("Textox");
+  await expect(dot(page)).toBeVisible();
+});
+
+test("a saved 'spell checking off' preference applies when the app starts", async ({ page }) => {
+  await open(page, "# T\n", { spellcheckDisabled: true });
+  expect(await spellcheck(page)).toBe(false);
+});
