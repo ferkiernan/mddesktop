@@ -45,27 +45,28 @@ test("Temas: duplicate a built-in style, change its background with live preview
   // the real editor is untouched until the style is applied
   expect(await page.evaluate(() => document.documentElement.dataset.editorStyle)).toBe("default");
 
-  await panel.getByRole("button", { name: "Guardar" }).click();
+  // spec 014: one button saves and applies
+  await expect(panel.getByRole("button", { name: "Guardar" })).toHaveCount(0);
+  await panel.getByRole("button", { name: "Aplicar" }).click();
   await expect.poll(async () => (await calls(page, "styles_save")).length).toBe(1);
   const saved = ((await calls(page, "styles_save"))[0] as { styles: { id: string; label: string }[] }).styles;
   expect(saved[0].label).toBe("Copia de Winamp");
   const menuCall = (await calls(page, "set_custom_styles_menu")).at(-1) as { items: [string, string][] };
   expect(menuCall.items).toEqual([[saved[0].id, "Copia de Winamp"]]);
-
-  await panel.getByRole("button", { name: "Aplicar" }).click();
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.editorStyle)).toBe(saved[0].id);
   const contentBg = await page.locator(".editor-slot:not([hidden]) .mdd-editor").evaluate((el) => getComputedStyle(el).getPropertyValue("--mdw-content-bg").trim());
   expect(contentBg).toBe("#123456");
 });
 
-test("Temas: closing with unsaved changes asks Guardar / Descartar / Cancelar (spec 004 US4)", async ({ page }) => {
+test("Temas: closing with unapplied changes asks Aplicar / Descartar / Cancelar (spec 004 US4, 014)", async ({ page }) => {
   await open(page);
   await menu(page, "settings.themes");
   const panel = page.getByRole("dialog", { name: "Temas" });
   await panel.getByRole("button", { name: "Duplicar" }).click();
   await panel.getByRole("button", { name: "Cerrar" }).click();
-  const ask = page.getByRole("dialog", { name: "Cambios sin guardar" });
+  const ask = page.getByRole("dialog", { name: "Cambios sin aplicar" });
   await expect(ask).toBeVisible();
+  await expect(ask.getByRole("button", { name: "Aplicar" })).toBeVisible();
   await ask.getByRole("button", { name: "Descartar" }).click();
   await expect(panel).toHaveCount(0);
   expect(await calls(page, "styles_save")).toHaveLength(0);
@@ -151,7 +152,6 @@ test("Temas: the tab bar background can be chosen; the status bar keeps its colo
   await field.fill("#8b0000");
   await field.press("Enter");
   await expect.poll(() => panel.locator(".themes-preview-tabs").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(139, 0, 0)");
-  await panel.getByRole("button", { name: "Guardar" }).click();
   await panel.getByRole("button", { name: "Aplicar" }).click();
   await expect.poll(() => page.locator(".app-tabs").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(139, 0, 0)");
   // the status bar keeps the toolbar look (the duplicate may re-derive it slightly), never the tab colour

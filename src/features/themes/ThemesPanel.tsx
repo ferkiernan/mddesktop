@@ -195,16 +195,21 @@ export default function ThemesPanel() {
   const confirmLeave = async (): Promise<boolean> => {
     if (!dirty) return true;
     const choice = await ask({
-      title: "Cambios sin guardar",
-      message: `El estilo "${draft?.label}" tiene cambios sin guardar.`,
+      title: "Cambios sin aplicar",
+      message: `El estilo "${draft?.label}" tiene cambios sin aplicar.`,
       buttons: [
         { label: "Cancelar", value: "cancel" },
         { label: "Descartar", value: "discard" },
-        { label: "Guardar", value: "save", primary: true },
+        { label: "Aplicar", value: "apply", primary: true },
       ],
     });
     if (choice === "cancel") return false;
-    if (choice === "save") return save();
+    // spec 014: saving and applying are one action
+    if (choice === "apply") {
+      if (!(await save())) return false;
+      await setEditorStyle(selected);
+      return true;
+    }
     setEdits(null);
     return true;
   };
@@ -430,10 +435,13 @@ export default function ThemesPanel() {
         </div>
         <div className="dialog-actions">
           <button type="button" onClick={() => void close()}>Cerrar</button>
-          <button type="button" onClick={() => void save()} disabled={!editable || !dirty} title={!editable ? "Los estilos incluidos no se modifican: usa Duplicar" : !dirty ? "No hay cambios para guardar" : "Guardar el estilo"}>
-            Guardar
-          </button>
-          <button type="button" className="primary" onClick={() => void apply()} disabled={selected === active && !dirty}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => void apply()}
+            disabled={selected === active && !dirty}
+            title={selected === active && !dirty ? "Este estilo ya está aplicado" : "Guarda los cambios y aplica el estilo"}
+          >
             Aplicar
           </button>
         </div>
