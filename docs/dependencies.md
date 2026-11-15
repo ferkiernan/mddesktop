@@ -7,7 +7,7 @@ Principles I and IX: every dependency is justified; unused ones are removed.
 | Package | Why | Notes |
 |---|---|---|
 | `react`, `react-dom` 18.3 | UI (mandated); 18.3 is what `mdwysiwyg` is developed with | |
-| `mdwysiwyg` `^0.8.0` | WYSIWYG engine (mandated) | Installed from npm and pinned by `package-lock.json` (0.3.1 was never published; a fresh `npm ci` gives 0.8.0 with styles). Brings Tiptap/unified; lazy-loaded chunk; ~20 MB RAM per mounted editor |
+| `mdwysiwyg` `^0.9.0` | WYSIWYG engine (mandated) | Installed from npm and pinned by `package-lock.json` (0.3.1 was never published; a fresh `npm ci` gives 0.9.0 with styles). Brings Tiptap/unified; lazy-loaded chunk; ~20 MB RAM per mounted editor |
 | `zustand` | State (mandated); ~1 KB | |
 | `zod` | IPC validation (mandated) | |
 | `@tauri-apps/api` | IPC + events | |

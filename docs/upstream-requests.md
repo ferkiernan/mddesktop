@@ -23,7 +23,7 @@ Open an issue per item in the `mdwysiwyg` repository and link it here when creat
 | U2 `insertMarkdown` | **Shipped** in 0.3.0; used by Insertar > Imagen… |
 | U3 `resolveImageSrc` | **Shipped** in 0.3.0; relative images resolve through `asset:` |
 | U4 view state API | Open: https://github.com/ferkiernan/mdwysiwyg/issues/3; the pool of 3 editors remains |
-| U5 duplicate `link` warning | Open: https://github.com/ferkiernan/mdwysiwyg/issues/4 (still logged by 0.8.0) |
+| U5 duplicate `link` warning | Fixed upstream in 0.8.2 (StarterKit link disabled); not logged with 0.9.0 (2026-11-15) |
 | U6 unstyled package | **Fixed** (fix tagged 0.3.1, never published; first published with it: 0.4.0; `verify:dist` guards it) |
 | U7 history bar in Spanish | https://github.com/ferkiernan/mdwysiwyg/issues/5: "Confirm" / "Cancel (back to last version)" and the arrows' labels should be localizable or Spanish like the rest of the UI |
 | U8 Mermaid theme option | https://github.com/ferkiernan/mdwysiwyg/issues/6: a prop or variable to pick Mermaid's theme (e.g. `dark`) so dark styles can draw dark diagrams; today the app keeps diagram backgrounds light (bug `pdf-mermaid-missing`) |

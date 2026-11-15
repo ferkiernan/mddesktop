@@ -13,4 +13,4 @@ Based on `mdwysiwyg` **0.8.0** (spec 003, 2026-11-14). Earlier notes for 0.2.x a
 | Built-in content zoom (`allowContentZoom`) steps 10 % and does not report the level | Cannot persist it or use 5 % steps | Off; the app drives `--mdw-content-zoom` itself (spec 007) |
 | Canonical re-serialization after WYSIWYG edits | Bullet/emphasis style may change (`*` → `-`); semantics preserved | Opening and toggling views never rewrites the file; the app saves only what the editor reports |
 | Mermaid/Tiptap weight | ~20 MB RAM per mounted editor | Lazy-loaded chunk, pool cap; measured in [performance.md](performance.md) |
-| Duplicate `link` extension warning | Console noise on every mount | Still present in 0.8.0 (U5) |
+| Duplicate `link` extension warning | Console noise on every mount | Fixed in 0.8.2 (U5); none logged with 0.9.0 |
