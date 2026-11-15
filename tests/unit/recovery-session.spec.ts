@@ -119,11 +119,26 @@ describe("session restore (FR-021)", () => {
       read_document: () => disk("C:\\a.md", "otra version", "h9"),
       recovery_write: () => null,
       recovery_delete: () => null,
+      // the disk now has h9: a save that still expects h1 is a conflict
+      write_document: (a) => ((a?.expectedFingerprint as { hash?: string } | null)?.hash === "h9"
+        ? { fingerprint: fp("h10") }
+        : Promise.reject({ code: "EXTERNAL_CONFLICT", message: "changed" })),
     });
+    askMock.mockResolvedValue("ignore");
     await restoreSession();
     const d = Object.values(useDocuments.getState().docs)[0];
     expect(d.externalState).toBe("modified");
     expect(d.content).toBe("mi version");
+    // spec 008 FR-012: the old fingerprint is kept (a save detects the conflict) and the dialog is offered
+    expect(d.fingerprint?.hash).toBe("h1");
+    await vi.waitFor(() => expect(askMock).toHaveBeenCalled());
+    expect(askMock.mock.calls[0][0].buttons.map((b: { value: string }) => b.value)).toEqual(["ignore", "reload", "compare"]);
+    // "Ignorar cambios" + Guardar asks before replacing the disk version
+    const { save } = await import("../../src/features/documents/actions");
+    askMock.mockReset();
+    askMock.mockResolvedValue("cancel");
+    expect(await save(d.id)).toBe(false);
+    expect(askMock.mock.calls[0][0].title).toMatch(/Reemplazar/);
   });
 
   it("recovers untitled documents and orphan entries automatically", async () => {

@@ -83,6 +83,7 @@ export const app = {
   getLaunchFiles: () => call("get_launch_files", Paths),
   setStyleMenu: (style: string) => call("set_style_menu", Void, { style }),
   setViewMenu: (toolbar: boolean, history: boolean) => call("set_view_menu", Void, { toolbar, history }),
+  openAboutLink: (which: "project" | "library" | "author") => call("open_about_link", Void, { which }),
   setCustomStylesMenu: (items: [string, string][], active: string) => call("set_custom_styles_menu", Void, { items, active }),
 };
 

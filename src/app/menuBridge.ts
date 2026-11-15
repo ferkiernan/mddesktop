@@ -3,7 +3,6 @@ import { newDocument, openFiles, save, saveAs } from "../features/documents/acti
 import { requestClose, requestCloseAll, requestExit } from "../features/documents/closeFlow";
 import { useDocuments } from "../features/documents/store";
 import { activateNext } from "../features/tabs/tabs";
-import { insertImage } from "../features/images/insertImage";
 import { runEdit } from "../features/editor/editCommands";
 import {
   setEditorStyle,
@@ -54,9 +53,6 @@ export function runMenuAction(id: MenuActionId) {
       // loaded on demand: the export module is only needed when the user exports
       void import("../features/export/exportDocument").then((m) => m.exportActiveDocument(id.slice(7) as ExportFormat));
       return;
-    case "insert.image":
-      void insertImage();
-      return;
     case "edit.undo":
     case "edit.redo":
     case "edit.cut":
@@ -82,6 +78,9 @@ export function runMenuAction(id: MenuActionId) {
       return;
     case "view.toggleToolbar":
       void toggleEditorToolbar();
+      return;
+    case "help.about":
+      void import("../features/about/aboutStore").then((m) => m.openAbout());
       return;
     case "settings.themes":
       void import("../features/themes/themesPanelStore").then((m) => m.openThemesPanel());

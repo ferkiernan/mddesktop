@@ -7,6 +7,7 @@ import { ToastHost } from "../ui/Toast";
 import { DialogHost } from "../ui/dialogs";
 import { ExportPanelHost } from "../features/export/ExportPanelHost";
 import { ThemesPanelHost } from "../features/themes/ThemesPanelHost";
+import { AboutHost } from "../features/about/AboutDialog";
 import { useStyleCatalog } from "../features/themes/catalog";
 import { runMenuAction, startMenuBridge } from "./menuBridge";
 import { startShortcuts } from "../features/shortcuts/manager";
@@ -101,6 +102,7 @@ export default function App() {
         <ToastHost />
         <ExportPanelHost />
         <ThemesPanelHost />
+        <AboutHost />
         <DialogHost />
       </div>
     </ErrorBoundary>

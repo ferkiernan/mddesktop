@@ -15,7 +15,7 @@ describe("primary button accent", () => {
   });
 
   it("picks dark text on light accents and white on dark ones", () => {
-    expect(accentText("#cec940")).toBe("#111111");
+    expect(accentText("#cec940")).toBe("#000000");
     expect(accentText("#0069a7")).toBe("#ffffff");
   });
 });

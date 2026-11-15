@@ -61,6 +61,33 @@ pub fn set_custom_styles_menu(app: AppHandle, state: State<'_, AppState>, items:
     Ok(())
 }
 
+/// The only links the About dialog can open (spec 011 FR-005).
+pub fn about_link(which: &str) -> Option<&'static str> {
+    match which {
+        "project" => Some("https://github.com/ferkiernan/mddesktop"),
+        "library" => Some("https://github.com/ferkiernan/mdwysiwyg"),
+        "author" => Some("https://github.com/ferkiernan"),
+        _ => None,
+    }
+}
+
+/// Opens one of the About links in the default browser.
+#[tauri::command]
+pub fn open_about_link(which: String) -> AppResult<()> {
+    let url = about_link(&which).ok_or_else(|| AppError::new(ErrorCode::InvalidArgument, "enlace no permitido"))?;
+    crate::platform::open_url(url).map_err(|e| AppError::new(ErrorCode::Io, e.to_string()))
+}
+
+#[cfg(test)]
+mod about_tests {
+    #[test]
+    fn only_the_three_about_links_are_allowed() {
+        assert_eq!(super::about_link("library"), Some("https://github.com/ferkiernan/mdwysiwyg"));
+        assert!(super::about_link("https://evil.example").is_none());
+        assert!(super::about_link("").is_none());
+    }
+}
+
 /// Files passed on the command line of the first launch (already authorized). Drains the list.
 #[tauri::command]
 pub fn get_launch_files(state: State<'_, AppState>) -> Vec<PathBuf> {

@@ -76,3 +76,18 @@ describe("content zoom and bar size (spec 007)", () => {
     expect(isContentArea(document.getElementById("t"))).toBe(false);
   });
 });
+
+describe("tab bar background (spec 010)", () => {
+  it("without a tab colour the tab bar keeps the toolbar look; with one, text is chosen for contrast", async () => {
+    const { chromeOf } = await import("../../src/features/settings/applyStyle");
+    const base = { bg: "#ffffff", fg: "#111111", accent: "#3366cc", border: "#cccccc", bar: "#dddddd" };
+    const plain = chromeOf({ id: "a", label: "a", vars: deriveVars(base) });
+    expect(plain.tabsBg).toBe(plain.bar);
+    expect(deriveVars(base)["--mdd-tabs-bg"]).toBeUndefined();
+    for (const tabsBg of ["#8b0000", "#f5f5dc", "#777777"]) {
+      const c = chromeOf({ id: "b", label: "b", vars: deriveVars({ ...base, tabsBg }) });
+      expect(c.tabsBg).toBe(tabsBg);
+      expect(contrast(parseColor(c.tabsFg)!, parseColor(tabsBg)!), tabsBg).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});

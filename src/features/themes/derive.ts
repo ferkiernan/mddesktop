@@ -10,6 +10,8 @@ export interface BaseColors {
   border: string;
   bar: string;
   barFg?: string;
+  /** Background of the tab bar (spec 010); unset = derived from the toolbar like before. */
+  tabsBg?: string;
   font?: string;
   mono?: string;
 }
@@ -58,6 +60,7 @@ export function deriveVars(base: BaseColors): StyleVars {
     "--mdw-muted": muted,
     "--mdw-border": base.border,
     "--mdw-accent": base.accent,
+    ...(base.tabsBg ? { "--mdd-tabs-bg": base.tabsBg } : {}),
     "--mdw-toolbar-gradient-from": mix(base.bar, "#ffffff", 0.25),
     "--mdw-toolbar-gradient-via": base.bar,
     "--mdw-toolbar-gradient-to": mix(base.bar, "#000000", 0.12),
@@ -122,6 +125,7 @@ export const VAR_GROUPS: { title: string; vars: [string, string][] }[] = [
   {
     title: "Barra",
     vars: [
+      ["--mdd-tabs-bg", "Fondo de la barra de pestañas"],
       ["--mdw-toolbar-gradient-from", "Degradado (inicio)"], ["--mdw-toolbar-gradient-via", "Degradado (medio)"], ["--mdw-toolbar-gradient-to", "Degradado (fin)"],
       ["--mdw-toolbar-fg", "Texto e iconos"], ["--mdw-toolbar-select-bg", "Selector de encabezado"], ["--mdw-button-active-bg", "Botón activo"],
       ["--mdw-button-hover-gradient-from", "Botón en hover (inicio)"], ["--mdw-button-hover-gradient-to", "Botón en hover (fin)"],

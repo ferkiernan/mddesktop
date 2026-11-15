@@ -58,6 +58,7 @@ pub fn run() {
             commands::session::styles_load,
             commands::session::styles_save,
             commands::app::set_custom_styles_menu,
+            commands::app::open_about_link,
             commands::session::settings_save,
             commands::images::pick_image,
             commands::images::import_image,

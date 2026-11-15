@@ -79,7 +79,7 @@ fn validate(s: &CustomStyle) -> AppResult<()> {
         return bad("el nombre debe tener entre 1 y 40 caracteres");
     }
     for (k, v) in s.base.iter().chain(s.overrides.iter()) {
-        if !valid_var_name(k) && !matches!(k.as_str(), "bg" | "fg" | "accent" | "border" | "bar" | "barFg" | "font" | "mono") {
+        if !valid_var_name(k) && !matches!(k.as_str(), "bg" | "fg" | "accent" | "border" | "bar" | "barFg" | "tabsBg" | "font" | "mono") {
             return bad(&format!("variable no admitida: {k}"));
         }
         if !valid_value(v) {

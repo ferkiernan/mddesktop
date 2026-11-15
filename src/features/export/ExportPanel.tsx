@@ -27,6 +27,8 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
   const error = errorState?.styleId === styleId ? errorState.text : null;
   const progress = progressState?.styleId === styleId ? progressState.text : "Preparando vista previa…";
   const [page, setPage] = useState(1);
+  /** Page being looked at; kept when the style changes (spec 005 US3 #4). */
+  const keepPage = useRef(1);
   const generation = useRef(0);
   const signal = useRef({ cancelled: false });
   const scroller = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
         const urls = (built.pages ?? []).map((p) => `data:image/jpeg;base64,${toBase64(p.jpeg)}`);
         urlsRef.current = urls;
         setResult({ styleId, built, urls });
-        setPage(1);
+        setPage(Math.min(keepPage.current, Math.max(1, urls.length)));
       })
       .catch((e: unknown) => {
         if (gen === generation.current && !sig.cancelled) setError({ styleId, text: e instanceof Error ? e.message : String(e) });
@@ -93,8 +95,22 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
     const el = scroller.current;
     if (!el || !preview?.urls.length) return;
     const pageH = el.scrollHeight / preview.urls.length;
-    setPage(Math.min(preview.urls.length, Math.floor((el.scrollTop + el.clientHeight / 3) / pageH) + 1));
+    const p = Math.min(preview.urls.length, Math.floor((el.scrollTop + el.clientHeight / 3) / pageH) + 1);
+    keepPage.current = p;
+    setPage(p);
   };
+
+  // a new preview (another style) opens at the page that was being looked at
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el || !preview?.urls.length) return;
+    const target = Math.min(keepPage.current, preview.urls.length);
+    const img = el.querySelectorAll("img")[target - 1] as HTMLImageElement | undefined;
+    if (!img) return;
+    const go = () => (el.scrollTop += img.getBoundingClientRect().top - el.getBoundingClientRect().top - 12);
+    if (img.complete) go();
+    else img.addEventListener("load", go, { once: true });
+  }, [preview]);
 
   const total = preview?.urls.length ?? 0;
   return (

@@ -48,6 +48,7 @@ const BASIC: [keyof BaseColors, string][] = [
   ["accent", "Acento (enlaces y selección)"],
   ["border", "Bordes"],
   ["bar", "Barra de herramientas"],
+  ["tabsBg", "Fondo de la barra de pestañas"],
 ];
 
 interface Draft {
@@ -70,13 +71,14 @@ function isValidCss(v: string): boolean {
   return safe && (CSS.supports("color", v) || CSS.supports("background", v));
 }
 
-function ColorField({ label, value, onChange, onReset, custom }: { label: string; value: string; onChange(v: string): void; onReset?(): void; custom?: boolean }) {
+function ColorField({ label, value, onChange, onReset, custom, fallback }: { label: string; value: string; onChange(v: string): void; onReset?(): void; custom?: boolean; fallback?: string }) {
   // the text box shows the current value except while the user is typing in it
   const [editing, setEditing] = useState<string | null>(null);
   const [badFor, setBadFor] = useState<string | null>(null);
   const bad = badFor === value;
   const text = editing ?? value;
-  const picker = pickerValue(value);
+  // an optional colour that is not set yet starts the picker from what is shown today (`fallback`)
+  const picker = pickerValue(value) ?? (fallback ? pickerValue(fallback) : null);
   return (
     <div className={`theme-field${custom ? " custom" : ""}`}>
       <span className="theme-field-label">{label}{custom ? " ·" : ""}</span>
@@ -86,12 +88,14 @@ function ColorField({ label, value, onChange, onReset, custom }: { label: string
         aria-label={`${label}: valor`}
         aria-invalid={bad}
         value={text}
+        placeholder={fallback ? "automático" : undefined}
         onFocus={() => setEditing(value)}
         onChange={(e) => setEditing(e.target.value)}
         onBlur={() => {
           const t = text.trim();
           setEditing(null);
-          if (isValidCss(t)) onChange(t);
+          if (!t && fallback) onReset?.();
+          else if (isValidCss(t)) onChange(t);
           else setBadFor(value);
         }}
         onKeyDown={(e) => {
@@ -260,6 +264,13 @@ export default function ThemesPanel() {
   });
 
   const setBase = (k: keyof BaseColors, v: string) => edit((d) => ({ ...d, base: { ...d.base, [k]: v }, overrides: mode === "basic" ? {} : d.overrides }));
+  /** Optional basic colours (tab bar background): back to the derived look. */
+  const clearBase = (k: keyof BaseColors) =>
+    edit((d) => {
+      const b = { ...d.base };
+      delete b[k];
+      return { ...d, base: b };
+    });
   const setVar = (k: string, v: string) => edit((d) => ({ ...d, overrides: { ...d.overrides, [k]: v } }));
   const resetVar = (k: string) =>
     edit((d) => {
@@ -333,7 +344,13 @@ export default function ThemesPanel() {
                 {mode === "basic" ? (
                   <div className="themes-fields">
                     {BASIC.map(([k, label]) => (
-                      <ColorField key={k} label={label} value={String(draft.base[k] ?? "")} onChange={(v) => setBase(k, v)} />
+                      <ColorField
+                        key={k}
+                        label={label}
+                        value={String(draft.base[k] ?? "")}
+                        onChange={(v) => setBase(k, v)}
+                        {...(k === "tabsBg" ? { fallback: draft.base.bar, custom: !!draft.base.tabsBg, onReset: () => clearBase("tabsBg") } : {})}
+                      />
                     ))}
                     <label className="theme-field">
                       <span className="theme-field-label">Tipografía</span>
@@ -373,7 +390,7 @@ export default function ThemesPanel() {
             {error && <p className="theme-field-error" role="alert">{error}</p>}
           </section>
           <section className="themes-preview" aria-label="Vista previa">
-            <div className="themes-preview-tabs" style={{ background: chrome.bar, color: chrome.barFg }}>
+            <div className="themes-preview-tabs" style={{ background: chrome.tabsBg, color: chrome.tabsFg }}>
               <span className="tab" aria-hidden="true" style={{ background: chrome.bg, color: chrome.fg }}>documento.md</span>
             </div>
             <div className="themes-preview-editor" style={{ ...previewVars, ["--mdw-toolbar-scale" as string]: String(barScale) } as CSSProperties}>

@@ -14,3 +14,8 @@ description: "Tareas: comparar al detectar cambios externos"
 - [X] T006 Enmienda de 001 FR-014 registrada en `specs/001-markdown-desktop-editor/spec.md` (Assumptions)
 - [X] T007 [P] Vitest: store (aceptar limpio/modificado, rechazar, ignorar, sincronizar) y diálogo (opciones, Escape = ignorar, sin diálogo si es igual) en `tests/unit/conflict.spec.ts`
 - [X] T008 [P] Playwright: cambio externo → Comparar → aceptar / rechazar, guardar con comparación pendiente, indicador en pestaña, en `tests/e2e/ui/data-protection.spec.ts`
+
+## Hallazgo del análisis (2026-11-15)
+
+- [X] T009 [US3] FR-012: al restaurar tras un cierre inesperado un archivo que cambió en disco, se conserva la huella anterior (guardar detecta el conflicto, no pisa en silencio) y se ofrece el diálogo de cambio externo sin bloquear el arranque, en `src/features/session/restore.ts`
+- [X] T010 [P] Prueba: recuperación con archivo cambiado en disco ⇒ diálogo ofrecido; "Ignorar cambios" + Guardar pide confirmación, en `tests/unit/recovery-session.spec.ts`

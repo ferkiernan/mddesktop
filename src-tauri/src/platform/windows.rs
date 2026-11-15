@@ -31,3 +31,9 @@ mod tests {
         assert_eq!(path_key(Path::new(r"C:\Docs\A.md")), path_key(Path::new(r"c:\docs\a.MD")));
     }
 }
+
+/// Opens an https URL in the default browser (Explorer hands it to the registered handler).
+/// Only called with fixed URLs from the About dialog; no shell is involved.
+pub fn open_url(url: &str) -> std::io::Result<()> {
+    std::process::Command::new("explorer.exe").arg(url).spawn().map(|_| ())
+}

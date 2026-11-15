@@ -140,3 +140,23 @@ test("primary buttons use the style accent, not a disabled-looking grey (bug pan
   expect(bg).toBe("rgb(61, 111, 216)"); // Default style accent #3d6fd8 (was #c8c8c8)
   expect(await apply.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
 });
+
+test("Temas: the tab bar background can be chosen; the status bar keeps its colour (spec 010)", async ({ page }) => {
+  await open(page);
+  const statusBefore = await page.locator(".app-status").evaluate((el) => getComputedStyle(el).backgroundImage + getComputedStyle(el).backgroundColor);
+  await menu(page, "settings.themes");
+  const panel = page.getByRole("dialog", { name: "Temas" });
+  await panel.getByRole("button", { name: "Duplicar" }).click();
+  const field = panel.getByRole("textbox", { name: "Fondo de la barra de pestañas: valor" });
+  await field.fill("#8b0000");
+  await field.press("Enter");
+  await expect.poll(() => panel.locator(".themes-preview-tabs").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(139, 0, 0)");
+  await panel.getByRole("button", { name: "Guardar" }).click();
+  await panel.getByRole("button", { name: "Aplicar" }).click();
+  await expect.poll(() => page.locator(".app-tabs").evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(139, 0, 0)");
+  // the status bar keeps the toolbar look (the duplicate may re-derive it slightly), never the tab colour
+  const statusAfter = await page.locator(".app-status").evaluate((el) => getComputedStyle(el).backgroundImage + getComputedStyle(el).backgroundColor);
+  expect(statusAfter).toMatch(/^linear-gradient/);
+  expect(statusAfter).not.toContain("139, 0, 0");
+  expect(statusBefore).toMatch(/^linear-gradient/);
+});

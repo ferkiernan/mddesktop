@@ -143,7 +143,6 @@ const BaseMenuActionIdSchema = z.enum([
   "file.close",
   "file.closeAll",
   "file.exit",
-  "insert.image",
   "export.html",
   "export.pdf",
   "export.docx",
@@ -162,6 +161,7 @@ const BaseMenuActionIdSchema = z.enum([
   "view.toggleToolbar",
   "settings.toggleHistory",
   "settings.themes",
+  "help.about",
   "tab.next",
   "tab.prev",
 ]);

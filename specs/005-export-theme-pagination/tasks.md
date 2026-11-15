@@ -33,3 +33,7 @@ description: "Tareas: estilo y paginación fiable al exportar"
 ## Dependencies
 
 T001–T003 → T004–T005; T006–T008 independientes del panel; T009–T011 se ejecutan cuando toda la codificación (incluidas 006, 008, 004, 007) termine.
+
+## Corrección (2026-11-15)
+
+- [X] T013 [US3] Al cambiar de estilo, la vista previa conserva la página que se estaba viendo (o la última si hay menos) en `src/features/export/ExportPanel.tsx`; prueba en `tests/e2e/ui/export.spec.ts`

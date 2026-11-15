@@ -47,7 +47,7 @@ export function luminance(color: string): number | null {
 export function accentText(accent: string): string {
   const c = parseColor(accent);
   if (!c) return "#ffffff";
-  return contrast(c, [255, 255, 255]) >= contrast(c, [17, 17, 17]) ? "#ffffff" : "#111111";
+  return contrast(c, [255, 255, 255]) >= contrast(c, [0, 0, 0]) ? "#ffffff" : "#000000";
 }
 
 export interface Chrome {
@@ -60,6 +60,9 @@ export interface Chrome {
   border: string;
   bar: string; // tab/status bar background (may be a gradient)
   barFg: string;
+  /** Tab bar only (spec 010): its own background when the style sets one, else the bar's. */
+  tabsBg: string;
+  tabsFg: string;
   font: string;
   dark: boolean;
 }
@@ -81,6 +84,8 @@ export function chromeOf(style: EditorStyle): Chrome {
     border: `color-mix(in srgb, ${fg} 22%, transparent)`,
     bar: `linear-gradient(${v["--mdw-toolbar-gradient-from"]}, ${v["--mdw-toolbar-gradient-via"]}, ${v["--mdw-toolbar-gradient-to"]})`,
     barFg: v["--mdw-toolbar-fg"] ?? fg,
+    tabsBg: v["--mdd-tabs-bg"] ?? `linear-gradient(${v["--mdw-toolbar-gradient-from"]}, ${v["--mdw-toolbar-gradient-via"]}, ${v["--mdw-toolbar-gradient-to"]})`,
+    tabsFg: v["--mdd-tabs-bg"] ? accentText(v["--mdd-tabs-bg"]) : (v["--mdw-toolbar-fg"] ?? fg),
     font: v["--mdw-toolbar-font-family"] ?? "system-ui, sans-serif",
     dark: (luminance(bg) ?? 1) < 0.4,
   };
@@ -113,6 +118,8 @@ export function applyEditorStyle(id: string): EditorStyle {
   set("--border", c.border);
   set("--bar-bg", c.bar);
   set("--bar-fg", c.barFg);
+  set("--tabs-bg", c.tabsBg);
+  set("--tabs-fg", c.tabsFg);
   set("--ui-font", c.font);
   return style;
 }

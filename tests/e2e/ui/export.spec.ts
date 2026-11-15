@@ -142,3 +142,30 @@ test("exporting with another style uses it and remembers it (spec 005)", async (
   expect(html).not.toContain("rgb(11, 18, 32)");
   expect((await calls(page, "settings_save")).some((c) => (c as { patch?: { exportStyle?: string } }).patch?.exportStyle === "default")).toBe(true);
 });
+
+test("changing the style keeps the preview at the page being viewed (spec 005 US3)", async ({ page }) => {
+  test.setTimeout(90_000);
+  const long = Array.from({ length: 120 }, (_, i) => `Párrafo ${i + 1} con texto suficiente para ocupar una línea completa del documento.`).join("\n\n");
+  await installTauri(page, baseResponses({
+    settings_load: PREFS,
+    pick_open_files: ["C:\\docs\\largo.md"],
+    read_document: diskDoc("C:\\docs\\largo.md", `# Largo\n\n${long}\n`),
+  }));
+  await gotoApp(page);
+  await menu(page, "file.open");
+  await page.locator(".editor-slot:not([hidden]) .ProseMirror").waitFor();
+  await menu(page, "export.pdf");
+  const panel = page.getByRole("dialog", { name: /^Exportar:/ });
+  await expect(panel.getByRole("button", { name: "Exportar…" })).toBeEnabled({ timeout: 30_000 });
+  const status = panel.locator(".export-panel-status");
+  await expect(status).toContainText(/Página 1 de [3-9]/);
+  // look at page 3
+  await panel.getByRole("img", { name: /^Página 3 de/ }).scrollIntoViewIfNeeded();
+  await expect(status).toContainText(/Página 3 de/);
+  await panel.getByRole("radio", { name: "Oscuro" }).check();
+  await expect(panel.getByRole("button", { name: "Exportar…" })).toBeEnabled({ timeout: 30_000 });
+  await expect(status).toContainText(/Página 3 de/);
+  const box = await panel.getByRole("img", { name: /^Página 3 de/ }).boundingBox();
+  const area = (await panel.locator(".export-panel-preview").boundingBox())!;
+  expect(box!.y).toBeLessThan(area.y + area.height / 2); // page 3 is on screen, near the top
+});

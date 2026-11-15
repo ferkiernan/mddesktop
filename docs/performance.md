@@ -51,3 +51,25 @@ Editor bundle grew (JS ~122 KB → ~195 KB, CSS ~11 KB → ~19 KB). Version hist
 
 Note: measuring with a leftover session (4 restored 100 KB documents) gives ~540 MB private: the budget is for one document; the
 pool keeps up to 3 editors mounted.
+
+## Specs 004–011 (release build with the dev identifier, 2026-11-15)
+
+Same machine. Clean session (no restored tabs) before each run; content zoom 110 % in the settings used.
+
+| Metric | Spec 003 | Now | Target | Verdict |
+|---|---|---|---|---|
+| Idle memory, whole tree, empty | 180–189 MB | 181–191 MB private | — | reference |
+| Idle memory, whole tree, one small document | 201–210 MB | 192–203 MB private / ~415 MB working set | < 250 MB private (SC-002) | ✅ |
+| Idle memory, whole tree, one 100 KB document | not measured | 469–483 MB private / ~690 MB working set | — | reference (not comparable with earlier rows) |
+| Window visible | 30–143 ms | 30–165 ms | < 2 s | ✅ |
+| Idle CPU | 0–0.6 % | 0–1.6 % | ≈ 0 | ✅ |
+| Open 100 KB in running app | 366–380 ms | 378–386 ms | < 500 ms | ✅ |
+| Tab switch 100 KB (median / max) | 55 / 63–65 ms | 54–57 / 64–72 ms | < 100 ms (SC-003) | ✅ |
+| Open from process start (3 × 100 KB) | 1.85–1.89 s | 1.85–1.89 s | — | reference |
+| Export panel → preview ready, 30 KB (PDF 10 pages / HTML / Word) | — | 0.90–0.94 s / 0.46–0.50 s / 0.47–0.51 s | — | reference (spec 005) |
+| Export panel → preview ready, 100 KB (PDF 33 pages / HTML / Word) | — | 4.5–4.7 s / 0.71–0.73 s / 0.68–0.81 s | — | reference (spec 005) |
+| Content zoom step (spec 007) | — | 11 ms (two frames) | — | ✅ |
+| Release exe | 7.12 MB | 7.34 MB | — | reference |
+
+Notes: one earlier run gave a 105 ms switch median while leftover test processes were still running; the numbers above are
+from clean runs. The PDF preview draws every page before "Exportar…" is enabled, so its time grows with the page count.

@@ -54,10 +54,6 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .item(&item("edit.selectAll", "Seleccionar todo\tCtrl+A")?)
         .build()?;
 
-    let insert = SubmenuBuilder::new(app, "Insertar")
-        .item(&item("insert.image", "Imagen…")?)
-        .build()?;
-
     // editor options (spec 003): both on by default; the frontend keeps the marks in sync (set_view_menu)
     let toolbar = CheckMenuItemBuilder::with_id("view.toggleToolbar", "Mostrar barra de herramientas").checked(true).build(app)?;
     let history = CheckMenuItemBuilder::with_id("settings.toggleHistory", "Historial de versiones").checked(true).build(app)?;
@@ -94,12 +90,16 @@ pub fn setup(app: &mut App) -> tauri::Result<()> {
         .build()?;
     *state.view_items.lock().unwrap() = Some((toolbar, history));
 
+    let help = SubmenuBuilder::new(app, "Ayuda")
+        .item(&item("help.about", "Acerca de MD Desktop…")?)
+        .build()?;
+
     let menu = MenuBuilder::new(app)
         .item(&file)
         .item(&edit)
-        .item(&insert)
         .item(&view)
         .item(&settings)
+        .item(&help)
         .build()?;
     app.set_menu(menu)?;
     app.on_menu_event(|app, event| {
