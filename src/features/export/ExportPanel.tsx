@@ -2,7 +2,7 @@
 // save it. The preview is built with the real export pipeline and its bytes are the ones written (FR-004).
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "../settings/store";
-import { buildExport, type BuiltExport } from "./exportDocument";
+import { buildExport, toBase64, type BuiltExport } from "./exportDocument";
 import { closeExportPanel, type ExportPanelRequest } from "./exportPanelStore";
 import { exportStyleOptions, resolveExportStyle } from "./exportStyles";
 
@@ -33,7 +33,6 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
   const urlsRef = useRef<string[]>([]);
 
   const revoke = () => {
-    for (const u of urlsRef.current) URL.revokeObjectURL(u);
     urlsRef.current = [];
   };
 
@@ -49,7 +48,8 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
       .then((built) => {
         if (gen !== generation.current || sig.cancelled) return;
         revoke();
-        const urls = (built.pages ?? []).map((p) => URL.createObjectURL(new Blob([p.jpeg as BlobPart], { type: "image/jpeg" })));
+        // data: URLs: the app CSP allows data: images but not blob: (keeps the policy unchanged)
+        const urls = (built.pages ?? []).map((p) => `data:image/jpeg;base64,${toBase64(p.jpeg)}`);
         urlsRef.current = urls;
         setResult({ styleId, built, urls });
         setPage(1);
@@ -125,7 +125,7 @@ export default function ExportPanel({ request }: { request: ExportPanelRequest }
           <div className="export-panel-preview" ref={scroller} onScroll={onScroll} tabIndex={0} aria-label="Vista previa">
             {!preview && !error && <div className="export-panel-progress">{progress}</div>}
             {preview && total > 0 &&
-              preview.urls.map((u, i) => <img key={u} src={u} alt={`Página ${i + 1} de ${total}`} className="export-page" />)}
+              preview.urls.map((u, i) => <img key={i} src={u} alt={`Página ${i + 1} de ${total}`} className="export-page" />)}
             {preview && total === 0 && preview.built.html && (
               <iframe title="Vista previa" className="export-continuous" sandbox="" srcDoc={preview.built.html} />
             )}

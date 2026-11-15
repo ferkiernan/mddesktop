@@ -111,3 +111,32 @@ test("the bar size from Temas scales the tab bar, not the content (spec 007 US3)
   const zoom = await page.locator(".editor-slot:not([hidden]) .mdd-editor").evaluate((el) => getComputedStyle(el).getPropertyValue("--mdw-content-zoom").trim());
   expect(zoom).toBe("1");
 });
+
+test("built-in styles are listed in bold without the word 'incluido'; custom ones in normal weight (spec 009)", async ({ page }) => {
+  await open(page);
+  await menu(page, "settings.themes");
+  const panel = page.getByRole("dialog", { name: "Temas" });
+  const winamp = panel.getByRole("option", { name: /Winamp/ });
+  await expect(winamp).toContainText("Winamp");
+  expect(await winamp.locator(".theme-builtin").evaluate((el) => getComputedStyle(el).fontWeight)).toBe("700");
+  // visually there is no "incluido" text, but assistive technology still gets it
+  const visible = await winamp.evaluate((el) => { const c = el.cloneNode(true) as HTMLElement; c.querySelectorAll(".sr-only").forEach((x) => x.remove()); return c.textContent ?? ""; });
+  expect(visible).not.toMatch(/incluido/);
+  expect(await winamp.locator(".sr-only").evaluate((el) => el.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  await expect(winamp).toHaveAccessibleName(/estilo incluido/);
+  await panel.getByRole("button", { name: "Duplicar" }).click();
+  const copy = panel.getByRole("option", { name: /Copia de/ });
+  expect(await copy.locator("span").first().evaluate((el) => getComputedStyle(el).fontWeight)).toBe("400");
+});
+
+test("primary buttons use the style accent, not a disabled-looking grey (bug panel-buttons-disabled)", async ({ page }) => {
+  await open(page);
+  await menu(page, "settings.themes");
+  const panel = page.getByRole("dialog", { name: "Temas" });
+  await panel.getByRole("option", { name: /Winamp/ }).getByRole("button").click();
+  const apply = panel.getByRole("button", { name: "Aplicar" });
+  await expect(apply).toBeEnabled();
+  const bg = await apply.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(bg).toBe("rgb(61, 111, 216)"); // Default style accent #3d6fd8 (was #c8c8c8)
+  expect(await apply.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+});

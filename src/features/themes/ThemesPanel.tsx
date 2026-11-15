@@ -300,8 +300,9 @@ export default function ThemesPanel() {
               {listed.map((s) => (
                 <li key={s.id} role="option" aria-selected={s.id === selected}>
                   <button type="button" className={s.id === selected ? "selected" : ""} onClick={() => void select(s.id)}>
-                    {s.label}
-                    {s.builtIn ? <small> · incluido</small> : null}
+                    {/* spec 009: built-in styles in bold; "incluido" only for assistive technology */}
+                    <span className={s.builtIn ? "theme-builtin" : undefined}>{s.label}</span>
+                    {s.builtIn ? <span className="sr-only"> (estilo incluido)</span> : null}
                     {s.id === active ? <small> · activo</small> : null}
                   </button>
                 </li>
@@ -309,7 +310,7 @@ export default function ThemesPanel() {
             </ul>
             <div className="themes-list-actions">
               <button type="button" onClick={() => void startCopy()}>{builtIn ? "Duplicar" : "Nuevo a partir de este"}</button>
-              <button type="button" onClick={() => void remove()} disabled={!savedCustom}>
+              <button type="button" onClick={() => void remove()} disabled={!savedCustom} title={savedCustom ? "Eliminar este estilo" : "Los estilos incluidos no se pueden eliminar"}>
                 Eliminar
               </button>
             </div>
@@ -382,7 +383,7 @@ export default function ThemesPanel() {
         </div>
         <div className="dialog-actions">
           <button type="button" onClick={() => void close()}>Cerrar</button>
-          <button type="button" onClick={() => void save()} disabled={!editable || !dirty}>
+          <button type="button" onClick={() => void save()} disabled={!editable || !dirty} title={!editable ? "Los estilos incluidos no se modifican: usa Duplicar" : !dirty ? "No hay cambios para guardar" : "Guardar el estilo"}>
             Guardar
           </button>
           <button type="button" className="primary" onClick={() => void apply()} disabled={selected === active && !dirty}>

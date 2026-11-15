@@ -2,6 +2,7 @@
 // override them on the component's className) and a few derived variables restyle the app chrome
 // (tabs, status bar, dialogs) so the whole window matches the chosen look.
 import { EDITOR_STYLES, type EditorStyle } from "./editorStyles";
+import { contrast, parseColor } from "../export/native/color";
 
 export const EDITOR_CLASS = "mdd-editor";
 export const DEFAULT_STYLE_ID = "default";
@@ -42,11 +43,20 @@ export function luminance(color: string): number | null {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+/** White or near-black text for a solid accent colour (contrast against both, keeps the better one). */
+export function accentText(accent: string): string {
+  const c = parseColor(accent);
+  if (!c) return "#ffffff";
+  return contrast(c, [255, 255, 255]) >= contrast(c, [17, 17, 17]) ? "#ffffff" : "#111111";
+}
+
 export interface Chrome {
   bg: string;
   fg: string;
   muted: string;
   accent: string;
+  /** Text on accent-coloured surfaces (primary buttons): black or white, whichever reads better. */
+  accentFg: string;
   border: string;
   bar: string; // tab/status bar background (may be a gradient)
   barFg: string;
@@ -64,7 +74,10 @@ export function chromeOf(style: EditorStyle): Chrome {
     bg,
     fg,
     muted: v["--mdw-toolbar-select-bg"] ?? bg,
-    accent: v["--mdw-button-active-bg"] ?? "#2563eb",
+    // the style's accent (mdwysiwyg >= 0.5); `--mdw-button-active-bg` is a pressed-button grey in light styles,
+    // which made primary buttons look disabled (bug panel-buttons-disabled)
+    accent: v["--mdw-accent"] ?? v["--mdw-button-active-bg"] ?? "#2563eb",
+    accentFg: accentText(v["--mdw-accent"] ?? v["--mdw-button-active-bg"] ?? "#2563eb"),
     border: `color-mix(in srgb, ${fg} 22%, transparent)`,
     bar: `linear-gradient(${v["--mdw-toolbar-gradient-from"]}, ${v["--mdw-toolbar-gradient-via"]}, ${v["--mdw-toolbar-gradient-to"]})`,
     barFg: v["--mdw-toolbar-fg"] ?? fg,
@@ -96,6 +109,7 @@ export function applyEditorStyle(id: string): EditorStyle {
   set("--fg", c.fg);
   set("--muted", c.muted);
   set("--accent", c.accent);
+  set("--accent-fg", c.accentFg);
   set("--border", c.border);
   set("--bar-bg", c.bar);
   set("--bar-fg", c.barFg);
