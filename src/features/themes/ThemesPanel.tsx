@@ -109,7 +109,7 @@ function ColorField({ label, value, onChange, onReset, custom, fallback }: { lab
   const picker = pickerValue(value) ?? (fallback ? pickerValue(fallback) : null) ?? "#000000";
   return (
     <div className={`theme-field${custom ? " custom" : ""}`}>
-      <span className="theme-field-label">{label}{custom ? " ·" : ""}</span>
+      <span className="theme-field-label"><span className="theme-field-name" title={label}>{label}</span></span>
       <input type="color" aria-label={`${label}: selector de color`} value={picker} onChange={(e) => onChange(e.target.value)} />
       <input
         type="text"
@@ -382,8 +382,8 @@ export default function ThemesPanel() {
                         {...(k === "tabsBg" ? { fallback: draft.base.bar, custom: !!draft.base.tabsBg, onReset: () => clearBase("tabsBg") } : {})}
                       />
                     ))}
-                    <label className="theme-field">
-                      <span className="theme-field-label">Tipografía</span>
+                    <label className="theme-field theme-field-select">
+                      <span className="theme-field-label"><span className="theme-field-name" title="Tipografía">Tipografía</span></span>
                       <select value={draft.base.font ?? FONT_CHOICES[0]} onChange={(e) => setBase("font", e.target.value)}>
                         {[...new Set([draft.base.font ?? FONT_CHOICES[0], ...FONT_CHOICES])].map((f) => (
                           <option key={f} value={f}>{f}</option>

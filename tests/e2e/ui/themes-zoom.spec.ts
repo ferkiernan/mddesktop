@@ -193,3 +193,36 @@ test("Temas: compact colour fields, icon reset on the same row, tab bar field al
   await expect(value).toHaveValue(before);
   await expect(panel.getByRole("button", { name: "Restablecer Fondo suave" })).toHaveCount(0);
 });
+
+test("Temas: attributes are aligned rows with a dotted guide (spec 013)", async ({ page }) => {
+  await open(page);
+  await menu(page, "settings.themes");
+  const panel = page.getByRole("dialog", { name: "Temas" });
+  await panel.getByRole("button", { name: "Duplicar" }).click();
+  await panel.getByRole("tab", { name: "Avanzado" }).click();
+  const value = panel.getByRole("textbox", { name: "Degradado (inicio): valor" });
+  await value.fill("#e5e5e5");
+  await value.press("Enter");
+  for (const mode of ["Avanzado", "Básico"]) {
+    await panel.getByRole("tab", { name: mode }).click();
+    const rows = await panel.locator(".themes-fields .theme-field:not(.theme-field-select)").evaluateAll((els) => els.map((el) => {
+      const r = (s: string) => el.querySelector(s)?.getBoundingClientRect();
+      const label = el.querySelector(".theme-field-label")!;
+      return {
+        swatch: r('input[type="color"]')!.x, value: r('input[type="text"]')!.x, height: el.getBoundingClientRect().height,
+        guide: getComputedStyle(label, "::after").borderBottomStyle, guideWidth: parseFloat(getComputedStyle(label, "::after").width),
+        bold: getComputedStyle(label).fontWeight, custom: el.classList.contains("custom"), text: label.textContent,
+      };
+    }));
+    expect(rows.length, mode).toBeGreaterThan(4);
+    for (const row of rows) {
+      expect(Math.abs(row.swatch - rows[0].swatch), `${mode} ${row.text}`).toBeLessThanOrEqual(1);
+      expect(Math.abs(row.value - rows[0].value)).toBeLessThanOrEqual(1);
+      expect(row.height).toBeLessThan(30); // one line
+      expect(row.guide).toBe("dotted");
+      expect(row.guideWidth).toBeGreaterThanOrEqual(12);
+      expect(row.text).not.toContain("·");
+      expect(Number(row.bold) >= 700).toBe(row.custom);
+    }
+  }
+});
